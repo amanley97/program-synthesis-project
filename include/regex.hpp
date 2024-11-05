@@ -1,4 +1,7 @@
-/// @file regex.hpp
+/**
+ * \file regex.hpp
+ * \author Harlan Williams <hrw@ku.edu>
+ */
 
 #ifndef __REGEX_HPP__
 #define __REGEX_HPP__
@@ -9,21 +12,43 @@
 #include <utility>
 #include <vector>
 
-/// @brief Consume part of a string, optionally returning a pair of the (matching substring, the rest of the string)
-/// or None if no match was found.
-///
-/// `match` is an expression in a restricted regex grammar that implements only single capture groups, character
-/// classes in square brackets, the `+` and `*` operators, and `^` to represent either the beginning of a string or
-/// a `not` in a character class.
-/// @param str 
-/// @param match 
-/// @return `Option[Match, Rest]`
+/**
+ * @brief This function handles the creation of compiled regular expressions, and matching, and should be used
+ * rather than instantiating a `Regex` directly.
+ * 
+ * Consumes part of a string, optionally returning a pair of the (matching substring, the rest of the string)
+ * or `nullopt` if no match was found.
+ * 
+ * `match` is an expression in a restricted regex grammar that implements only single capture groups, character
+ * classes in square brackets, the `+` and `*` operators, and `^` to represent either the beginning of a string or
+ * a `not` in a character class.
+ * 
+ * @param str 
+ * @param match 
+ * @return A `pair<string_view, string_view>` consisting of a string view of the matched substring, and the rest
+ * of the input string following the match, or `nullopt`.
+ */
 std::optional<std::pair<std::string_view, std::string_view>> consume(std::string_view str, const std::string &match);
 
+/**
+ * \class Regex
+ */
 class Regex {
 public:
     Regex() {}
+
+    /**
+     * \brief Compiles a regular expression.
+     * \see consume for a description of the regular expression language.
+     */
     Regex(const std::string &expr);
+
+    /**
+     * \brief Attempt to match a string using the compiled regular expression.
+     * 
+     * \param str
+     * \return A `pair<size_t, size_t>` of starting index, and the length of the match, or `nullopt`.
+     */
     std::optional<std::pair<std::size_t, std::size_t>> match(std::string_view str) const;
 private:
     struct RegexNode {
