@@ -141,7 +141,7 @@ std::optional<std::pair<std::size_t, std::size_t>> Regex::match(std::string_view
         stop_range = i;
     }
 
-    if (state_idx == _states.size() || (state_idx == _states.size() - 1 &&_states[state_idx].is_stop())) {
+    if (state_idx == _states.size() || _states[state_idx].is_star() || (state_idx == _states.size() - 1 &&_states[state_idx].is_stop())) {
         return std::make_pair(start_range, stop_range - start_range);
     }
 
