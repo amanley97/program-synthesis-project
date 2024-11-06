@@ -14,6 +14,7 @@ docs:
 	doxygen
 
 clean:
+	-rm -r docs
 	-rm *.gcov
 	-rm *.gcda
 	-rm *.gcno
