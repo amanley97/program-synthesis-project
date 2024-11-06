@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include "regex.hpp"
 #include "lexer.hpp"
@@ -79,7 +80,7 @@ static const char *token_to_symbol(Token tok) {
     }
 }
 
-std::vector<TokenPair> Lexer::lex(const std::string &source) {
+std::vector<TokenPair> Lexer::lex(const std::string &source) const noexcept {
     std::vector<TokenPair> tokens {};
     auto rest = std::string_view(source);
 
@@ -159,18 +160,23 @@ void Lexer::print_tokens(const std::vector<TokenPair> &tokens) const noexcept {
     std::cout << '\n';
 }
 
-void Lexer::print_symbols(const std::vector<TokenPair> &tokens) const noexcept {
+std::string Lexer::symbols_string(const std::vector<TokenPair> &tokens) const noexcept {
+    std::stringstream ss;
     for (auto &&[str, tok] : tokens) {
         if (tok == Token::Identifier || tok == Token::Number) {
-            std::cout << str;
+            ss << str;
         } else {
-            std::cout << token_to_symbol(tok);
+            ss << token_to_symbol(tok);
 
             if (print_with_space(tok)) {
-                std::cout << ' ';
+                ss << ' ';
             }
         }
     }
 
-    std::cout << '\n';
+    return ss.str();
+}
+
+void Lexer::print_symbols(const std::vector<TokenPair> &tokens) const noexcept {
+    std::cout << this->symbols_string(tokens) << '\n';
 }

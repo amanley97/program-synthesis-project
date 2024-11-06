@@ -13,7 +13,7 @@
 #include <vector>
 
 /**
- * @brief This function handles the creation of compiled regular expressions, and matching, and should be used
+ * \brief This function handles the creation of compiled regular expressions, and matching, and should be used
  * rather than instantiating a `Regex` directly.
  * 
  * Consumes part of a string, optionally returning a pair of the (matching substring, the rest of the string)
@@ -23,9 +23,9 @@
  * classes in square brackets, the `+` and `*` operators, and `^` to represent either the beginning of a string or
  * a `not` in a character class.
  * 
- * @param str 
- * @param match 
- * @return A `pair<string_view, string_view>` consisting of a string view of the matched substring, and the rest
+ * \param str 
+ * \param match 
+ * \return A `pair<string_view, string_view>` consisting of a string view of the matched substring, and the rest
  * of the input string following the match, or `nullopt`.
  */
 std::optional<std::pair<std::string_view, std::string_view>> consume(std::string_view str, const std::string &match);
