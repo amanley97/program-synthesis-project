@@ -13,9 +13,10 @@ static bool print_with_space(Token tok) {
     case Token::Colon:
     case Token::Comma:
     case Token::Semicolon:
-    case Token::RightBrace:
+    case Token::LeftBrace:
     case Token::RightBracket:
     case Token::KeywordComp:
+    case Token::KeywordNew:
         return true;
     default:
         return false;
@@ -47,6 +48,7 @@ static const char *token_to_string(Token tok) {
     case Token::Number: return "Number";
     case Token::Identifier: return "Identifier";
     case Token::KeywordComp: return "KeywordComp";
+    case Token::KeywordNew: return "KeywordNew";
     default: return "?";
     }
 }
@@ -76,73 +78,83 @@ static const char *token_to_symbol(Token tok) {
     case Token::Number: return "?";
     case Token::Identifier: return "?";
     case Token::KeywordComp: return "comp";
+    case Token::KeywordNew: return "new";
     default: return "?";
     }
+}
+
+Token Lexeme::token() const noexcept {
+    return _token;
+}
+
+int Lexeme::priority() const noexcept {
+    return _priority;
+}
+
+bool Lexeme::matches(std::string_view str) const noexcept {
+    if (const auto match = consume(str, _symbol); match.has_value()) {
+        return true;
+    }
+
+    return false;
+}
+
+std::optional<std::pair<std::string_view, std::size_t>> Lexeme::match(std::string_view str) const noexcept {
+    if (const auto match = consume(str, _symbol); match.has_value()) {
+        auto [match_str, rest] = match.value();
+        return std::make_pair(rest, match_str.size());
+    }
+
+    return std::nullopt;
+}
+
+void Lexer::add_lexeme(const char *symbol, Token token, int priority) noexcept {
+    _lexemes.emplace_back(symbol, token, priority);
 }
 
 std::vector<TokenPair> Lexer::lex(const std::string &source) const noexcept {
     std::vector<TokenPair> tokens {};
     auto rest = std::string_view(source);
 
-    for (std::size_t i = 0; i < rest.length(); ) {
+    for (std::size_t i = 0; i < rest.size(); ) {
         if (is_whitespace(rest[i])) {
             i++;
             continue;
         }
 
-        switch (rest[i]) {
-        case '@': tokens.emplace_back("", Token::At); i++; continue;
-        case ':': if (auto match_opt = consume(rest.substr(i), "^:="); match_opt.has_value()) {
-            tokens.emplace_back("", Token::ColonEquals);
-            i += 2;
-        } else {
-            tokens.emplace_back("", Token::Colon);
-            i++;
-        } continue;
-        case ',': tokens.emplace_back("", Token::Comma); i++; continue;
-        case '<': tokens.emplace_back("", Token::LessThan); i++; continue;
-        case '>': tokens.emplace_back("", Token::GreaterThan); i++; continue;
-        case '(': tokens.emplace_back("", Token::LeftParen); i++; continue;
-        case ')': tokens.emplace_back("", Token::RightParen); i++; continue;
-        case '[': tokens.emplace_back("", Token::LeftBracket); i++; continue;
-        case ']': tokens.emplace_back("", Token::RightBracket); i++; continue;
-        case '{': tokens.emplace_back("", Token::LeftBrace); i++; continue;
-        case '}': tokens.emplace_back("", Token::RightBrace); i++; continue;
-        case '+': tokens.emplace_back("", Token::Plus); i++; continue;
-        case '-': if (auto match_opt = consume(rest.substr(i), "^->"); match_opt.has_value()) {
-            tokens.emplace_back("", Token::RightArrow);
-            i += 2;
-        } else {
-            tokens.emplace_back("", Token::Minus);
-            i++;
-        } continue;
-        case '*': tokens.emplace_back("", Token::Star); i++; continue;
-        case '/': tokens.emplace_back("", Token::Slash); i++; continue;
-        case ';': tokens.emplace_back("", Token::Semicolon); i++; continue;
+        bool had_match = false;
+
+        /* Try to match the longest possible lexeme. This prevents shorter lexemes,
+         * such as `-` from preferentially matching over longer ones like `->`.
+         * If two lexemes have the same length, return the lexeme with higher
+         * priority. This prevents identifiers from matching over keywords. */
+        std::size_t longest_match = 0;
+        int highest_priority = 0;
+        auto longest_match_token = Token::None;
+
+        for (auto &&lexeme : _lexemes) {
+            if (auto match = lexeme.match(rest.substr(i)); match.has_value()) {
+                had_match = true;
+                auto [new_rest, match_len] = match.value();
+
+                if (match_len > longest_match) {
+                    longest_match = match_len;
+                    longest_match_token = lexeme.token();
+                    highest_priority = lexeme.priority();
+                } else if (match_len == longest_match && lexeme.priority() > highest_priority) {
+                    highest_priority = lexeme.priority();
+                    longest_match_token = lexeme.token();
+                }
+            }
         }
 
-        if (auto match_opt = consume(rest.substr(i), "^[0-9]+"); match_opt.has_value()) {
-            auto [match, match_rest] = match_opt.value();
-            tokens.emplace_back(std::string(match), Token::Number);
-            rest = match_rest;
-            i = 0;
-            continue;
-        } else if (auto match_opt = consume(rest.substr(i), "^(comp)[^a-zA-Z0-9_]"); match_opt.has_value()) {
-            auto [match, match_rest] = match_opt.value();
-            tokens.emplace_back("", Token::KeywordComp);
-            rest = match_rest;
-            i = 0;
-            continue;
-        } else if (auto match_opt = consume(rest.substr(i), "^[a-zA-Z_][a-zA-Z0-9_]*"); match_opt.has_value()) {
-            auto [match, match_rest] = match_opt.value();
-            tokens.emplace_back(std::string(match), Token::Identifier);
-            rest = match_rest;
-            i = 0;
-            continue;
+        if (!had_match) {
+            std::cout << "TokenError at " << i << ": '" << rest[i] << "'\n";
+            break;
+        } else {
+            tokens.emplace_back(rest.substr(i, longest_match), longest_match_token);
+            i += longest_match;
         }
-
-        tokens.emplace_back(std::string { rest[i] }, Token::Unknown);
-        i++;
     }
 
     return tokens;
@@ -162,9 +174,15 @@ void Lexer::print_tokens(const std::vector<TokenPair> &tokens) const noexcept {
 
 std::string Lexer::symbols_string(const std::vector<TokenPair> &tokens) const noexcept {
     std::stringstream ss;
-    for (auto &&[str, tok] : tokens) {
+
+    for (std::size_t i = 0; i < tokens.size(); i++) {
+        const auto &[str, tok] = tokens[i];
+
         if (tok == Token::Identifier || tok == Token::Number) {
             ss << str;
+            if (i + 1 < tokens.size() && tokens[i+1].second == Token::Identifier) {
+                ss << ' ';
+            }
         } else {
             ss << token_to_symbol(tok);
 

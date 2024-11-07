@@ -9,6 +9,10 @@
 /* grammar:
  * 
  * Statement ::= 'comp' Identifier GuardList ArgumentList ';'
+ * 
+ * GuardList ::= '<' Identifier (, Identifier)* '>'
+ * 
+ * ArgumentList ::= '(' ')'
  */
 
 #endif // __PARSER_HPP__

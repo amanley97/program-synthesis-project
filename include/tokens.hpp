@@ -30,6 +30,7 @@ enum class Token {
     Number,       /* [0-9]+ */
     Identifier,
     KeywordComp,  /* comp */
+    KeywordNew,  /* new */
 };
 
 #endif // __TOKENS_HPP__
