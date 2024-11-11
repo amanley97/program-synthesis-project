@@ -30,29 +30,34 @@ private:
 };
 
 
-class Expression : public ASTNode {
-
-};
+class Expression : public ASTNode {};
 
 // x ? y : z
-class IfThenElse : public Expression {
-
-};
+class IfThenElseExpr : public Expression {};
 
 // x == y
-class BoolEquals : public Expression {
+class BoolEqualsExpr : public Expression {};
 
-};
+// x + y
+class AdditionExpr : public Expression {};
 
-// new Add;
-class GetComponent final : public Expression {
+// x - y
+class SubtractionExpr : public Expression {};
 
-};
+// x * y
+class MultiplicationExpr : public Expression {};
+
+// x / y
+class DivisionExpr : public Expression {};
+
+// x % y
+class ModulusExpr : public Expression {};
+
+// new Comp;
+class GetComponentExpr final : public Expression {};
 
 // A<G + n>(...);
-class Invocation final : public Expression {
-
-};
+class InvocationExpr final : public Expression {};
 
 
 class Command : public ASTNode {
@@ -60,17 +65,17 @@ class Command : public ASTNode {
 };
 
 // `X := ...`
-class Instantiation final : public Command {
+class InstantiationCmd final : public Command {
 
 };
 
 // `X.y = ...`
-class Assignment final : public Command {
+class AssignmentCmd final : public Command {
 
 };
 
 // `port = port`
-class Connection final : public Command {
+class ConnectionCmd final : public Command {
 
 };
 
