@@ -26,6 +26,8 @@ const char *token_to_string(Token tok) {
     case Token::At: return "At";
     case Token::Colon: return "Colon";
     case Token::ColonEquals: return "ColonEquals";
+    case Token::Equals: return "Equals";
+    case Token::DoubleEquals: return "DoubleEquals";
     case Token::Comma: return "Comma";
     case Token::LessThan: return "LessThan";
     case Token::GreaterThan: return "GreaterThan";
@@ -61,6 +63,8 @@ const char *token_to_symbol(Token tok) {
     case Token::At: return "@";
     case Token::Colon: return ":";
     case Token::ColonEquals: return ":=";
+    case Token::Equals: return "=";
+    case Token::DoubleEquals: return "==";
     case Token::Comma: return ",";
     case Token::LessThan: return "<";
     case Token::GreaterThan: return ">";

@@ -25,6 +25,8 @@ enum class Token {
     At,           /*  @ */
     Colon,        /*  : */
     ColonEquals,  /* := */
+    Equals,       /*  = */
+    DoubleEquals, /* == */
     Comma,        /*  , */
     LessThan,     /*  < */
     GreaterThan,  /*  > */

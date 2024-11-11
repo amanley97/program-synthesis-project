@@ -128,6 +128,8 @@ void set_up_lexer_for_filament(Lexer &lexer) {
     lexer.add_lexeme("@", Token::At);
     lexer.add_lexeme(":", Token::Colon);
     lexer.add_lexeme(":=", Token::ColonEquals);
+    lexer.add_lexeme("=", Token::Equals);
+    lexer.add_lexeme("==", Token::DoubleEquals);
     lexer.add_lexeme(",", Token::Comma);
     lexer.add_lexeme("<", Token::LessThan);
     lexer.add_lexeme(">", Token::GreaterThan);
