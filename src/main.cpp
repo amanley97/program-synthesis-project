@@ -18,8 +18,7 @@ auto src = "comp Add<G>(); comp Mul<G>();\n"
            "    a0 := A<G+n>(l, r);\n"
            "}\n";
 
-int main(int argc, char *argv[]) {
-    Lexer lexer;
+void set_up_lexer_for_filament(Lexer &lexer) {
     lexer.add_lexeme("@", Token::At);
     lexer.add_lexeme(":", Token::Colon);
     lexer.add_lexeme(":=", Token::ColonEquals);
@@ -37,11 +36,19 @@ int main(int argc, char *argv[]) {
     lexer.add_lexeme("\\*", Token::Star);
     lexer.add_lexeme("/", Token::Slash);
     lexer.add_lexeme(";", Token::Semicolon);
+    lexer.add_lexeme("\\.", Token::Period);
     lexer.add_lexeme("->", Token::RightArrow);
     lexer.add_lexeme("[0-9]+", Token::Number);
     lexer.add_lexeme("[a-zA-Z_][a-zA-Z0-9'_]*", Token::Identifier);
     lexer.add_lexeme("comp", Token::KeywordComp, 1);
     lexer.add_lexeme("new", Token::KeywordNew, 1);
+    lexer.add_lexeme("interface", Token::KeywordInterface, 1);
+    lexer.add_lexeme("extern", Token::KeywordExtern, 1);
+}
+
+int main(int argc, char *argv[]) {
+    Lexer lexer;
+    set_up_lexer_for_filament(lexer);
 
     for (;;) {
         std::string line;

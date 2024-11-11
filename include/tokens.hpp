@@ -26,11 +26,18 @@ enum class Token {
     Star,         /*  * */
     Slash,        /*  / */
     Semicolon,    /*  ; */
+    Period,       /*  . */
     RightArrow,   /* -> */
     Number,       /* [0-9]+ */
     Identifier,
     KeywordComp,  /* comp */
-    KeywordNew,  /* new */
+    KeywordNew,   /* new */
+    KeywordInterface,  /* interface */
+    KeywordExtern,     /* extern */
 };
+
+bool print_with_space(Token tok);
+const char *token_to_string(Token tok);
+const char *token_to_symbol(Token tok);
 
 #endif // __TOKENS_HPP__
