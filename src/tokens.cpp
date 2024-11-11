@@ -2,6 +2,7 @@
 
 bool print_with_space(Token tok) {
     switch (tok) {
+    case Token::DoubleSlash:
     case Token::Colon:
     case Token::Comma:
     case Token::Semicolon:
@@ -11,6 +12,7 @@ bool print_with_space(Token tok) {
     case Token::KeywordNew:
     case Token::KeywordInterface:
     case Token::KeywordExtern:
+    case Token::KeywordWhere:
         return true;
     default:
         return false;
@@ -37,6 +39,7 @@ const char *token_to_string(Token tok) {
     case Token::Minus: return "Minus";
     case Token::Star: return "Star";
     case Token::Slash: return "Slash";
+    case Token::DoubleSlash: return "DoubleSlash";
     case Token::Semicolon: return "Semicolon";
     case Token::Period: return "Period";
     case Token::RightArrow: return "RightArrow";
@@ -46,6 +49,7 @@ const char *token_to_string(Token tok) {
     case Token::KeywordNew: return "KeywordNew";
     case Token::KeywordInterface: return "KeywordInterface";
     case Token::KeywordExtern: return "KeywordExtern";
+    case Token::KeywordWhere: return "KeywordWhere";
     default: return "?";
     }
 }
@@ -70,6 +74,7 @@ const char *token_to_symbol(Token tok) {
     case Token::Minus: return "-";
     case Token::Star: return "*";
     case Token::Slash: return "/";
+    case Token::DoubleSlash: return "//";
     case Token::Semicolon: return ";";
     case Token::Period: return ".";
     case Token::RightArrow: return "->";
@@ -79,6 +84,7 @@ const char *token_to_symbol(Token tok) {
     case Token::KeywordNew: return "new";
     case Token::KeywordInterface: return "interface";
     case Token::KeywordExtern: return "extern";
+    case Token::KeywordWhere: return "where";
     default: return "?";
     }
 }
