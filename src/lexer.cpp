@@ -8,81 +8,6 @@ static bool is_whitespace(char c) {
     return c == ' ' || c == '\t' || c == '\n';
 }
 
-static bool print_with_space(Token tok) {
-    switch (tok) {
-    case Token::Colon:
-    case Token::Comma:
-    case Token::Semicolon:
-    case Token::LeftBrace:
-    case Token::RightBracket:
-    case Token::KeywordComp:
-    case Token::KeywordNew:
-        return true;
-    default:
-        return false;
-    }
-}
-
-static const char *token_to_string(Token tok) {
-    switch (tok) {
-    case Token::None: return "None";
-    case Token::Unknown: return "Unknown";
-    case Token::At: return "At";
-    case Token::Colon: return "Colon";
-    case Token::ColonEquals: return "ColonEquals";
-    case Token::Comma: return "Comma";
-    case Token::LessThan: return "LessThan";
-    case Token::GreaterThan: return "GreaterThan";
-    case Token::LeftParen: return "LeftParen";
-    case Token::RightParen: return "RightParen";
-    case Token::LeftBracket: return "LeftBracket";
-    case Token::RightBracket: return "RightBracket";
-    case Token::LeftBrace: return "LeftBrace";
-    case Token::RightBrace: return "RightBrace";
-    case Token::Plus: return "Plus";
-    case Token::Minus: return "Minus";
-    case Token::Star: return "Star";
-    case Token::Slash: return "Slash";
-    case Token::Semicolon: return "Semicolon";
-    case Token::RightArrow: return "RightArrow";
-    case Token::Number: return "Number";
-    case Token::Identifier: return "Identifier";
-    case Token::KeywordComp: return "KeywordComp";
-    case Token::KeywordNew: return "KeywordNew";
-    default: return "?";
-    }
-}
-
-static const char *token_to_symbol(Token tok) {
-    switch (tok) {
-    case Token::None: return "None";
-    case Token::Unknown: return "Unknown";
-    case Token::At: return "@";
-    case Token::Colon: return ":";
-    case Token::ColonEquals: return ":=";
-    case Token::Comma: return ",";
-    case Token::LessThan: return "<";
-    case Token::GreaterThan: return ">";
-    case Token::LeftParen: return "(";
-    case Token::RightParen: return ")";
-    case Token::LeftBracket: return "[";
-    case Token::RightBracket: return "]";
-    case Token::LeftBrace: return "{";
-    case Token::RightBrace: return "}";
-    case Token::Plus: return "+";
-    case Token::Minus: return "-";
-    case Token::Star: return "*";
-    case Token::Slash: return "/";
-    case Token::Semicolon: return ";";
-    case Token::RightArrow: return "->";
-    case Token::Number: return "?";
-    case Token::Identifier: return "?";
-    case Token::KeywordComp: return "comp";
-    case Token::KeywordNew: return "new";
-    default: return "?";
-    }
-}
-
 Token Lexeme::token() const noexcept {
     return _token;
 }
@@ -197,4 +122,36 @@ std::string Lexer::symbols_string(const std::vector<TokenPair> &tokens) const no
 
 void Lexer::print_symbols(const std::vector<TokenPair> &tokens) const noexcept {
     std::cout << this->symbols_string(tokens) << '\n';
+}
+
+void set_up_lexer_for_filament(Lexer &lexer) {
+    lexer.add_lexeme("@", Token::At);
+    lexer.add_lexeme(":", Token::Colon);
+    lexer.add_lexeme(":=", Token::ColonEquals);
+    lexer.add_lexeme("=", Token::Equals);
+    lexer.add_lexeme("==", Token::DoubleEquals);
+    lexer.add_lexeme(",", Token::Comma);
+    lexer.add_lexeme("<", Token::LessThan);
+    lexer.add_lexeme(">", Token::GreaterThan);
+    lexer.add_lexeme("\\(", Token::LeftParen);
+    lexer.add_lexeme(")", Token::RightParen);
+    lexer.add_lexeme("\\[", Token::LeftBracket);
+    lexer.add_lexeme("]", Token::RightBracket);
+    lexer.add_lexeme("{", Token::LeftBrace);
+    lexer.add_lexeme("}", Token::RightBrace);
+    lexer.add_lexeme("\\+", Token::Plus);
+    lexer.add_lexeme("-", Token::Minus);
+    lexer.add_lexeme("\\*", Token::Star);
+    lexer.add_lexeme("/", Token::Slash);
+    lexer.add_lexeme("//", Token::DoubleSlash);
+    lexer.add_lexeme(";", Token::Semicolon);
+    lexer.add_lexeme("\\.", Token::Period);
+    lexer.add_lexeme("->", Token::RightArrow);
+    lexer.add_lexeme("[0-9]+", Token::Number);
+    lexer.add_lexeme("[a-zA-Z_][a-zA-Z0-9'_]*", Token::Identifier);
+    lexer.add_lexeme("comp", Token::KeywordComp, 1);
+    lexer.add_lexeme("new", Token::KeywordNew, 1);
+    lexer.add_lexeme("interface", Token::KeywordInterface, 1);
+    lexer.add_lexeme("extern", Token::KeywordExtern, 1);
+    lexer.add_lexeme("where", Token::KeywordWhere, 1);
 }

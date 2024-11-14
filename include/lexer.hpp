@@ -91,4 +91,11 @@ private:
     std::vector<Lexeme> _lexemes {};
 };
 
+/**
+ * \brief Associate the lexemes seen in Filament to a lexer
+ * 
+ * \param lexer Lexer object to associate tokens to
+ */
+void set_up_lexer_for_filament(Lexer &lexer);
+
 #endif // __LEXER_HPP__
