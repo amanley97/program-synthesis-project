@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
     set_up_lexer_for_filament(lexer);
 
     for (;;) {
+        std::cout << ">>> ";
         std::string line;
         std::getline(std::cin, line);
 
