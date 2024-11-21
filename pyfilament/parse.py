@@ -57,4 +57,3 @@ def parse(source: str) -> SExpr:
 
         pos += 1
     raise RuntimeError("Failed to parse S-Expression")
-
