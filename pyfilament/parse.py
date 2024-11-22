@@ -1,12 +1,13 @@
 from pyfilament.sexpr import SExpr
 
+
 def parens_balanced(source: str) -> bool:
     count = 0
 
     for ch in source:
-        if ch == '(':
+        if ch == "(":
             count += 1
-        elif ch == ')':
+        elif ch == ")":
             count -= 1
         if count < 0:
             return False
@@ -15,12 +16,14 @@ def parens_balanced(source: str) -> bool:
 
 
 def is_operator(c):
-    return c in ('+', '-', '*', '/', '>', '<', '=')
+    return c in ("+", "-", "*", "/", ">", "<", "=")
 
 
 def parse(source: str) -> SExpr:
     source = source.strip()
-    assert(len(source) > 0 and source[0] == "(" and source[-1] == ")"), """
+    assert (
+        len(source) > 0 and source[0] == "(" and source[-1] == ")"
+    ), """
         S-Expression must be non-empty and must begin and end with parentheses.
     """
 
@@ -29,7 +32,7 @@ def parse(source: str) -> SExpr:
 
     pos = 1
     expr = []
-    current_term = ''
+    current_term = ""
 
     while pos < len(source):
         if source[pos].isalnum() or is_operator(source[pos]):
@@ -37,20 +40,20 @@ def parse(source: str) -> SExpr:
         else:
             if len(current_term) > 0:
                 expr.append(current_term)
-                current_term = ''
+                current_term = ""
 
-            if source[pos] == '(':
+            if source[pos] == "(":
                 depth = 0
                 i = 1
-                while source[pos + i] != ')' or depth > 0:
-                    if source[pos + i] == '(':
+                while source[pos + i] != ")" or depth > 0:
+                    if source[pos + i] == "(":
                         depth += 1
-                    elif source[pos + i] == ')':
+                    elif source[pos + i] == ")":
                         depth -= 1
                     i += 1
-                expr.append(parse(source[pos: pos + i + 1]))
+                expr.append(parse(source[pos : pos + i + 1]))
                 pos += i
-            elif source[pos] == ')':
+            elif source[pos] == ")":
                 return SExpr(expr)
             elif source[pos].isalnum():
                 current_term += source[pos]
