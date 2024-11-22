@@ -20,9 +20,9 @@ class Time:
 class Range:
     """@[G, G+1]"""
 
-    def __init__(self, range_expr: SExpr):
-        self.begin = range_expr[0]
-        self.end = range_expr[1]
+    def __init__(self, begin: SExpr, end: SExpr):
+        self.begin = begin
+        self.end = end
 
     def well_formed(self):
         raise NotImplementedError()
@@ -31,7 +31,7 @@ class Range:
 class Port:
     """@[G, G+1] name: bitwidth"""
 
-    def __init__(self, name: str, liveness: Range, bitwidth: SExpr):
+    def __init__(self, name: str, liveness: Range, bitwidth):
         self.name = name
         self.liveness = liveness
         self.bitwidth = bitwidth

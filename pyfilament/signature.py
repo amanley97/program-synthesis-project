@@ -1,5 +1,6 @@
-from pyfilament.sexpr import SExpr
+from pyfilament.sexpr import SExpr, can_eval, eval_expr
 from pyfilament.data import *
+from z3 import *
 
 
 def parse_event(event: SExpr) -> Event:
@@ -13,8 +14,20 @@ def parse_port(port: SExpr, ctx) -> Port:
         pass
     elif port[0] == "in-port":
         name = port[1]
-        range = Range(port[2])
-        bitwidth = port[3]
+
+        if len(port[2]) == 2 and can_eval(port[2][0]) and can_eval(port[2][1]):
+            # TODO parse these into `Time`s
+            range = Range(port[2][0], port[2][1])
+        else:
+            raise RuntimeError(f"Error in range specification for port {port[0]}")
+
+        if can_eval(port[3]):
+            bitwidth = port[3]
+        else:
+            raise RuntimeError(f"Error in bitwidth specification for port {port[0]}")
+
+        return Port(name, range, bitwidth)
+
     elif port[0] == "out-port":
         pass
     else:
@@ -23,19 +36,50 @@ def parse_port(port: SExpr, ctx) -> Port:
         )
 
 
-def parse_constraint(constraint: SExpr) -> SExpr:
-    return constraint
+# Updated parse_constraint to integrate with Z3
+def parse_constraint(constraint: SExpr):
+    """
+    Convert SExpr constraints into Z3 expressions.
+    """
+    if constraint[0] == "=":
+        return Int(constraint[1]) == Int(constraint[2])
+    elif constraint[0] == ">":
+        return Int(constraint[1]) > Int(constraint[2])
+    elif constraint[0] == "<":
+        return Int(constraint[1]) < Int(constraint[2])
+    else:
+        raise RuntimeError(f"Unsupported constraint operator: {constraint[0]}")
 
 
+# Updated Signature class
 class Signature:
     def __init__(self, sexpr: SExpr):
         assert sexpr[0] == "comp", "Not a component definition"
         assert len(sexpr) == 5, "Malformed component definition"
+
         self.name = sexpr[1]
         self.events = list(map(parse_event, [event for event in sexpr[2]]))
         self.ports = list(
             map(lambda p: parse_port(p, self.events), [port for port in sexpr[3]])
         )
+
+        # Parse constraints as Z3 expressions
         self.constraints = list(
             map(parse_constraint, [constraint for constraint in sexpr[4][1:]])
         )
+
+    def solve_constraints(self):
+        """
+        Solve the constraints using Z3.
+        """
+        solver = Solver()
+        for constraint in self.constraints:
+            solver.add(constraint)
+
+        if solver.check() == sat:
+            model = solver.model()
+            print("Solution:")
+            for var in model:
+                print(f"{var} = {model[var]}")
+        else:
+            print("No solution found.")
