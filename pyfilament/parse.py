@@ -19,7 +19,27 @@ def is_operator(c):
     return c in ("+", "-", "*", "/", ">", "<", "=")
 
 
+def parse_timing(source: str) -> str:
+    """
+    Extract timing constraints from a source string, if present.
+    For example:
+        "@ clk" -> "clk"
+        "@ [clk, clk+1]" -> "[clk, clk+1]"
+    """
+    if "@" not in source:
+        return None, source.strip()
+
+    parts = source.split("@", maxsplit=1)
+    expr_part = parts[0].strip()
+    timing_part = parts[1].strip()
+
+    return timing_part, expr_part
+
+
 def parse(source: str) -> SExpr:
+    """
+    Parse a string into an S-expression representation.
+    """
     source = source.strip()
     assert (
         len(source) > 0 and source[0] == "(" and source[-1] == ")"
@@ -39,7 +59,12 @@ def parse(source: str) -> SExpr:
             current_term += source[pos]
         else:
             if len(current_term) > 0:
-                expr.append(current_term)
+                # Check for timing constraints
+                timing, term = parse_timing(current_term)
+                if timing:
+                    expr.append(SExpr(["timing", term, timing]))
+                else:
+                    expr.append(current_term)
                 current_term = ""
 
             if source[pos] == "(":
@@ -59,4 +84,5 @@ def parse(source: str) -> SExpr:
                 current_term += source[pos]
 
         pos += 1
+
     raise RuntimeError("Failed to parse S-Expression")
