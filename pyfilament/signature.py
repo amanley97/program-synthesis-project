@@ -15,7 +15,7 @@ def parse_port(port: SExpr, ctx) -> Port:
     elif port[0] == "in-port":
         name = port[1]
 
-        if len(port[2]) == 2 and can_eval(port[2][0]) and can_eval(port[2][1]):
+        if len(port[2]) == 3 and can_eval(port[2][0]) and can_eval(port[2][1]):
             # TODO parse these into `Time`s
             range = Range(port[2][0], port[2][1])
         else:

@@ -22,7 +22,10 @@ class SExpr:
         return len(self.as_list)
 
 
-def can_eval(expr):
+def can_eval(expr: SExpr | str) -> bool:
+    """
+    Checks if a given SExpr contains only numbers or arithmetic operations
+    """
     match expr:
         case SExpr():
             match expr[0]:
@@ -41,9 +44,14 @@ def can_eval(expr):
             if len(expr) > 0 and expr[0].isalpha():
                 return True
             return False
+        case _:
+            raise TypeError("Expected SExpr or string")
 
 
-def eval_expr(expr):
+def eval_expr(expr: SExpr | str) -> bool:
+    """
+    Turns an arithmetic SExpr into a Z3 expression that can be used as part of a constraint
+    """
     match expr:
         case str(expr):
             if expr.isdecimal():
@@ -67,3 +75,5 @@ def eval_expr(expr):
                     raise RuntimeError(f"Invalid arithmetic expression: {expr}")
                 case _:
                     raise RuntimeError(f"Invalid arithmetic expression: {expr}")
+        case _:
+            raise TypeError("Expected SExpr or string")
