@@ -2,6 +2,8 @@
 import re
 from typing import Optional, List, Union, Dict
 
+from . import Component, Command, Invoke, Instance, Connect
+
 class Port:
     def __init__(self, name: str, direction: str, range_: Optional[str], width: int):
         self.name = name
@@ -25,107 +27,6 @@ class Port:
         else:
             raise ValueError(f"Invalid port format: {port_str}")
 
-class Component:
-    def __init__(self, name: str, guard: str, interface: str, in_ports: List[Port], out_ports: List[Port]):
-        self.name = name
-        self.guard = guard
-        self.interface = interface
-        self.in_ports = in_ports
-        self.out_ports = out_ports
-
-    def __repr__(self):
-        return (f"Component(name={self.name}, guard={self.guard}, interface={self.interface}, "
-                f"in_ports={self.in_ports}, out_ports={self.out_ports})")
-
-    @staticmethod
-    def parse(component: str) -> "Component":
-        # Match the name and guard
-        name_match = re.search(r"comp\s+(\w+)<([^>]*)>", component)
-        name = name_match.group(1) if name_match else None
-        guard = f"<{name_match.group(2)}>" if name_match else None
-
-        # Match the interface
-        interface_match = re.search(r"\(@interface\[.*?\]\s*([^)]*)\)", component)
-        interface = interface_match.group(1).strip() if interface_match else None
-
-        # Match input ports
-        in_ports_match = re.findall(r"(@\[.*?\]\s*\w+:\s*\d+)", component)
-        in_ports = [Port.parse(port_str, direction="in") for port_str in in_ports_match]
-
-        # Match output ports
-        out_ports_match = re.findall(r"(@\[.*?\]\s*\w+:\s*\d+)", component)
-        out_ports = [Port.parse(port_str, direction="out") for port_str in out_ports_match]
-
-        return Component(name, guard, interface, in_ports, out_ports)
-
-
-class Command:
-    def __init__(self, text: str):
-        self.text = text
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.text})"
-
-class Instance(Command):
-    def __init__(self, text: str, variable: str, type_name: str, size: Optional[int]):
-        super().__init__(text)
-        self.variable = variable
-        self.type_name = type_name
-        self.size = size
-
-    def __repr__(self):
-        return (f"{self.__class__.__name__}(variable={self.variable}, type_name={self.type_name}, "
-                f"size={self.size})")
-
-    @staticmethod
-    def parse(cmd: str):
-        match = re.match(r"(\w+)\s*:=\s*new\s+(\w+)\[(\d+)\]", cmd)
-        if match:
-            variable, type_name, size = match.groups()
-            return Instance(cmd, variable, type_name, int(size))    
-        else:
-            raise ValueError(f"Invalid Instance command format: {cmd}")
-        
-class Invoke(Command):
-    def __init__(self, text: str, variable: str, function: str, range_: str, ports: List[str]):
-        super().__init__(text)
-        self.variable = variable
-        self.function = function
-        self.range_ = range_
-        self.ports = ports
-
-    def __repr__(self):
-        return (f"{self.__class__.__name__}(variable={self.variable}, function={self.function}, "
-                f"range_={self.range_}, ports={self.ports})")
-
-    @staticmethod
-    def parse(cmd: str):
-        match = re.match(r"(\w+)\s*:=\s*(\w+)<([^>]*)>\(([^)]*)\)", cmd.strip())
-        if match:
-            variable, function, range_, ports = match.groups()
-            ports_list = [port.strip() for port in ports.split(",")]
-            return Invoke(cmd, variable, function, range_, ports_list)
-        else:
-            raise ValueError(f"Invalid Invoke command format: {cmd}")
-
-# Subclass for Connect commands
-class Connect(Command):
-    def __init__(self, text: str, target: str, source: str):
-        super().__init__(text)
-        self.target = target
-        self.source = source
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}(target={self.target}, source={self.source})"
-    
-    @staticmethod
-    def parse(cmd:str):
-        match = re.match(r"(\w+)\s*=\s*(\w+)", cmd)
-        if match:
-            target, source = match.groups()
-            return Connect(cmd, target, source)
-        else:
-            raise ValueError(f"Invalid Connect command format: {cmd}")
 
 class PyFilamentLower:
     def __init__(self):

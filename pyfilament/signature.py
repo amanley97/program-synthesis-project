@@ -2,6 +2,8 @@ from pyfilament.sexpr import SExpr, can_eval, eval_expr
 from pyfilament.data import *
 from z3 import *
 
+from . import Port
+
 
 def parse_event(event: SExpr) -> Event:
     if event[0] != "event":
