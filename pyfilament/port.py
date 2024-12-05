@@ -1,10 +1,17 @@
+from enum import Enum
+
 from typing import Optional
 
+class Direction(Enum):
+    IN = 0
+    OUT = 1
+    INTERFACE = 2
+
 class Port:
-    def __init__(self, name: str, direction: str, range_: Optional[set], width: int):
+    def __init__(self, name: str, direction: Direction, range: Optional[set], width: int):
         self.name = name
         self.direction = direction
-        self.range_ = range_
+        self.range = range
         self.width = width
 
     def __repr__(self):
@@ -21,7 +28,7 @@ class InterfacePort(Port):
             event (str): Event associated with the port.
             width (int): Width of the port in bits.
         """
-        super().__init__(name, 'interface', (event, event), width)
+        super().__init__(name, Direction.INTERFACE, (event, event), width)
         self.event = event
 
     def __repr__(self):
