@@ -8,10 +8,10 @@ class Direction(Enum):
     INTERFACE = 2
 
 class Port:
-    def __init__(self, name: str, direction: Direction, range: Optional[set], width: int):
+    def __init__(self, name: str, direction: Direction, range_: tuple, width: int):
         self.name = name
         self.direction = direction
-        self.range = range
+        self.range_ = range_
         self.width = width
 
     def __repr__(self):
