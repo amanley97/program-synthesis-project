@@ -8,5 +8,21 @@ class Port:
         self.width = width
 
     def __repr__(self):
-        return (f"Port(name={self.name}, direction={self.direction}, "
-                f"range_={self.range_}, width={self.width})")
+        range_str = f"({self.range_[0]}, {self.range_[1]})"
+        return f"@[{range_str}] {self.name}: {self.width}"
+
+class InterfacePort(Port):
+    def __init__(self, name: str, event: str, width: int):
+        """
+        Represent an interface port with an event.
+
+        Args:
+            name (str): Name of the port.
+            event (str): Event associated with the port.
+            width (int): Width of the port in bits.
+        """
+        super().__init__(name, 'interface', (event, event), width)
+        self.event = event
+
+    def __repr__(self):
+        return f"@interface[{self.event}] {self.name}: {self.width}"
