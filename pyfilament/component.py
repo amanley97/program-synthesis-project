@@ -1,8 +1,8 @@
 from typing import List
 
-from pyfilament.command import Command, Instance, Invoke
-from pyfilament.port import Port, InterfacePort
-from pyfilament.sexpr import SExpr
+from command import Command, Instance, Invoke
+from port import Port, InterfacePort
+from sexpr import SExpr
 
 class Component:
     def __init__(self, signature: 'Signature', commands: List[Command]):

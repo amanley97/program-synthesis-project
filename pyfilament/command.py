@@ -71,7 +71,11 @@ class Invoke(Command):
 
     def __repr__(self):
         ports_str = ", ".join(self.ports)
-        return f"{self.variable} := invoke {self.function}<{self.range_}>({ports_str});"
+        if len(self.range_) == 2:
+            range_str = f"{self.range_[0]}, {self.range_[1]}"
+        else:
+            range_str = f"{self.range_[0]}"
+        return f"{self.variable} := invoke {self.function}<{range_str}>({ports_str});"
 
 
 class Connect(Command):
@@ -90,5 +94,5 @@ class Connect(Command):
         self.guard = guard
 
     def __repr__(self):
-        guard_str = f"{self.guard} ? " if self.guard else ""
-        return f"{self.dest} = {guard_str}{self.src};"
+        guard_str = f" ? {self.guard}" if self.guard else ""
+        return f"{self.dest} = {self.src}{guard_str};"
