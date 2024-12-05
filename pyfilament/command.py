@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pyfilament.sexpr import SExpr
+from sexpr import SExpr
 # from component import Signature
 
 class Command:
@@ -42,7 +42,7 @@ class Instance(Command):
         return Instance(name, type_name, width)
 
 class Invoke(Command):
-    def __init__(self, variable: str, function: str, event: str, ports: List[str]):
+    def __init__(self, variable: str, function: str, range_: tuple, ports: List[str]):
         """
         Represent an (invoke) command.
 
@@ -55,7 +55,7 @@ class Invoke(Command):
         super().__init__()
         self.variable = variable
         self.function = function
-        self.event = event
+        self.range_ = range_
         self.ports = ports
 
     @staticmethod
@@ -91,4 +91,4 @@ class Connect(Command):
 
     def __repr__(self):
         guard_str = f"{self.guard} ? " if self.guard else ""
-        return f"{self.target} = {guard_str}{self.source};"
+        return f"{self.dest} = {guard_str}{self.src};"
