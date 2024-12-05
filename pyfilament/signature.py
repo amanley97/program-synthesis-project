@@ -2,7 +2,7 @@ from pyfilament.sexpr import SExpr, can_eval, eval_expr
 from pyfilament.data import *
 from z3 import *
 
-from . import Port
+# from . import Port
 
 
 def parse_event(event: SExpr) -> Event:
@@ -56,19 +56,10 @@ def parse_constraint(constraint: SExpr):
 # Updated Signature class
 class Signature:
     def __init__(self, sexpr: SExpr):
-        assert sexpr[0] == "comp", "Not a component definition"
-        assert len(sexpr) == 5, "Malformed component definition"
+        self.port_mapping = dict() # str -> port
+        self.port_mapping += {'left': Port(...)}
 
-        self.name = sexpr[1]
-        self.events = list(map(parse_event, [event for event in sexpr[2]]))
-        self.ports = list(
-            map(lambda p: parse_port(p, self.events), [port for port in sexpr[3]])
-        )
 
-        # Parse constraints as Z3 expressions
-        self.constraints = list(
-            map(parse_constraint, [constraint for constraint in sexpr[4][1:]])
-        )
 
     def solve_constraints(self):
         """

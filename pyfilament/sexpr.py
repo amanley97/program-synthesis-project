@@ -10,7 +10,17 @@ class SExpr:
             raise RuntimeError("Expression is not arithmetic")
 
     def __getitem__(self, key):
-        return self.as_list[key]
+        if isinstance(key, int):
+            return self.as_list[key]
+        elif isinstance(key, str):
+            for i, item in enumerate(self.as_list):
+                if isinstance(item, str):
+                    if item == key and i + 1 < len(self):
+                        return self[i+1]
+                elif isinstance(item, SExpr):
+                    if len(item) > 0 and isinstance(item[0], str):
+                        if item[0] == key:
+                            return item.as_list[1:]
 
     def __str__(self):
         return "(" + " ".join(map(str, self.as_list)) + ")"

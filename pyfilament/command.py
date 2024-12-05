@@ -1,5 +1,7 @@
 from typing import List, Optional
 
+from pyfilament.sexpr import SExpr
+# from component import Signature
 
 class Command:
     def __init__(self):
@@ -28,6 +30,16 @@ class Instance(Command):
         size_str = f"[{self.size}]" if self.size else ""
         return f"{self.variable} := new {self.type_name}{size_str};"
 
+    @staticmethod
+    def from_sexpr(sexpr: SExpr):
+        name = sexpr[0]
+        definition = sexpr[1][1]
+        start, stop = definition.find('['), definition.find(']')
+        if start == -1 or stop == -1:
+            raise RuntimeError("No width for instantiation")
+        type_name = definition[:start]
+        width = definition[start+1:stop]
+        return Instance(name, type_name, width)
 
 class Invoke(Command):
     def __init__(self, variable: str, function: str, event: str, ports: List[str]):
@@ -45,6 +57,17 @@ class Invoke(Command):
         self.function = function
         self.event = event
         self.ports = ports
+
+    @staticmethod
+    def from_sexpr(sexpr: SExpr):
+        name = sexpr[0]
+        definition = sexpr[1][1]
+        start, stop = definition.find('['), definition.find(']')
+        if start == -1 or stop == -1:
+            raise RuntimeError("No width for instantiation")
+        type_name = definition[:start]
+        width = definition[start+1:stop]
+        return Instance(name, type_name, width)
 
     def __repr__(self):
         ports_str = ", ".join(self.ports)

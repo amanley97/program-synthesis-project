@@ -1,6 +1,7 @@
 from enum import Enum
-
 from typing import Optional
+
+from pyfilament.sexpr import SExpr
 
 class Direction(Enum):
     IN = 0
@@ -13,6 +14,27 @@ class Port:
         self.direction = direction
         self.range_ = range_
         self.width = width
+
+    @staticmethod
+    def from_sexpr(sexpr: SExpr):
+        if sexpr[0].startswith("in-port"):
+            direction = Direction.IN
+        elif sexpr[0].startswith("out-port"):
+            direction = Direction.OUT
+        elif sexpr[0].startswith("interface"):
+            direction = Direction.INTERFACE
+        else:
+            raise RuntimeError(f"Invalid direction for port: {sexpr}")
+        
+        start, stop = sexpr[0].find('['), sexpr[0].find(']')
+        if start == -1 or stop == -1:
+            raise RuntimeError(f"No width specified for port: {sexpr}")
+        width = int(sexpr[0][start+1:stop])
+        range_ = sexpr[1]
+        name = sexpr[2]
+        if direction == Direction.INTERFACE:
+            return InterfacePort(name, range_, width)
+        return Port(name, direction, range_, width)
 
     def __repr__(self):
         range_str = f"({self.range_[0]}, {self.range_[1]})"

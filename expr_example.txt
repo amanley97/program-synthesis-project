@@ -69,10 +69,10 @@ main = Component(
             variable='X', type_name='Xor', size=32
         ),
         Invoke(
-            variable='a0', function='A', range_='G', ports=['left','right']
+            variable='a0', function='A', range_='G', inputs=['left','right']
         ),
         Invoke(
-            variable='x0', function='X', range_='G+1', ports=['a0.out', 'opt']
+            variable='x0', function='X', range_='G+1', inputs=['a0.out', 'opt']
         ),
         Connect(
             source='x0.out', target='out'
