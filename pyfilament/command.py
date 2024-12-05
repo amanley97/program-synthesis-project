@@ -30,20 +30,20 @@ class Instance(Command):
 
 
 class Invoke(Command):
-    def __init__(self, variable: str, function: str, range_: str, ports: List[str]):
+    def __init__(self, variable: str, function: str, event: str, ports: List[str]):
         """
         Represent an (invoke) command.
 
         Args:
             variable (str): The name of the invoke variable.
             function (str): The function or instance being invoked.
-            range_ (str): The range or event associated with the invoke.
+            event (str): The event associated with the invoke.
             ports (List[str]): The list of port names connected to the invoke.
         """
         super().__init__()
         self.variable = variable
         self.function = function
-        self.range_ = range_
+        self.event = event
         self.ports = ports
 
     def __repr__(self):
@@ -52,7 +52,7 @@ class Invoke(Command):
 
 
 class Connect(Command):
-    def __init__(self, target: str, source: str, guard: Optional[str] = None):
+    def __init__(self, dest: str, src: str, guard: Optional[str] = None):
         """
         Represent a (connect) command.
 
@@ -62,8 +62,8 @@ class Connect(Command):
             guard (Optional[str]): The guard condition for the connection.
         """
         super().__init__()
-        self.target = target
-        self.source = source
+        self.dest = dest
+        self.src = src
         self.guard = guard
 
     def __repr__(self):
