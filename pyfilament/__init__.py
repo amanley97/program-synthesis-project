@@ -1,3 +1,3 @@
-from pyfilament.parse import parse
+from pyfilament.parse import parse, parse_file
 from pyfilament.sexpr import SExpr, can_eval, eval_expr
 from pyfilament.signature import Signature

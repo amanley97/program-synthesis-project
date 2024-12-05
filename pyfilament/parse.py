@@ -1,3 +1,5 @@
+from typing import List
+
 from pyfilament.sexpr import SExpr
 
 
@@ -36,7 +38,12 @@ def parse_timing(source: str) -> str:
     return timing_part, expr_part
 
 
-def parse(source: str) -> SExpr:
+def append_if_nonempty(s: str, l: List[str]):
+    if len(s) > 0:
+        l.append(s)
+
+
+def parse_expr(source: str) -> SExpr:
     """
     Parse a string into an S-expression representation.
     """
@@ -55,18 +62,16 @@ def parse(source: str) -> SExpr:
     current_term = ""
 
     while pos < len(source):
-        if source[pos].isalnum() or is_operator(source[pos]):
+        if source[pos].isalnum() or is_operator(source[pos]) or source[pos] in ('[', ']'):
             current_term += source[pos]
         else:
+            if source[pos] == ';': # comment
+                append_if_nonempty(current_term, expr)
+                while source[pos] != '\n':
+                    pos += 1
             if len(current_term) > 0:
-                # Check for timing constraints
-                timing, term = parse_timing(current_term)
-                if timing:
-                    expr.append(SExpr(["timing", term, timing]))
-                else:
-                    expr.append(current_term)
+                append_if_nonempty(current_term, expr)
                 current_term = ""
-
             if source[pos] == "(":
                 depth = 0
                 i = 1
@@ -76,13 +81,40 @@ def parse(source: str) -> SExpr:
                     elif source[pos + i] == ")":
                         depth -= 1
                     i += 1
-                expr.append(parse(source[pos : pos + i + 1]))
+                inner_expr, _ = parse_expr(source[pos : pos + i + 1])
+                append_if_nonempty(inner_expr, expr)
                 pos += i
             elif source[pos] == ")":
-                return SExpr(expr)
+                return SExpr(expr), pos
             elif source[pos].isalnum():
                 current_term += source[pos]
 
         pos += 1
 
     raise RuntimeError("Failed to parse S-Expression")
+
+
+def parse(source: str) -> List[SExpr]:
+    """
+    Parse a string containing multiple S expressions
+    """
+    exprs = []
+    pos = 0
+    while pos < len(source):
+        while pos < len(source) and source[pos] != '(':
+            pos += 1
+        if pos >= len(source):
+            break
+        else:
+            expr, offset = parse_expr(source[pos:])
+            exprs.append(expr)
+            pos += offset
+    return exprs
+
+
+def parse_file(filepath: str):
+    """
+    Parse a file containing S Expressions
+    """
+    with open(filepath, "r", encoding="utf-8") as fp:
+        return parse(fp.read())
