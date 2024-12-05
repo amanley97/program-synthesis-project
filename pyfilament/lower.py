@@ -1,100 +1,138 @@
-# Takes in a namespace and generates lower filament for it
-import re
-from typing import Optional, List, Union, Dict
+from command import Invoke, Instance, Connect
+from component import Component, Signature
+from port import Port, InterfacePort
+from fsm import Fsm
 
-from . import Component, Command, Invoke, Instance, Connect
+def generate_lower(component: Component):
+    """
+        Entry point to transform a component into lower filament.
 
-class Port:
-    def __init__(self, name: str, direction: str, range_: Optional[str], width: int):
-        self.name = name
-        self.direction = direction
-        self.range_ = range_
-        self.width = width
+        Args:
+            component (Component): Component to be transformed.
+        """
+    lower_fil = FSMgen.generate(component)
+    print(lower_fil)
 
-    def __repr__(self):
-        return (f"Port(name={self.name}, direction={self.direction}, "
-                f"range_={self.range_}, width={self.width})")
+class FSMgen:
+    def __init__(self, ctx:Component):
+        """
+        Initialize the FSM generator with FSM details and context.
+        """
+        self.ctx = ctx
+        self.ports = ctx.signature.in_ports + ctx.signature.out_ports
+        self.states = self.determine_states(self.ports)
+        self.fsm = self.new()
 
-    @staticmethod
-    def parse(port_str: str, direction: str) -> "Port":
-        # Match the range, name, and width
-        match = re.match(r"@\[([^\]]*)\]\s*(\w+):\s*(\d+)", port_str)
-        if match:
-            range_ = match.group(1).strip() if match.group(1) else None
-            name = match.group(2)
-            width = int(match.group(3))
-            return Port(name, direction, range_, width)
-        else:
-            raise ValueError(f"Invalid port format: {port_str}")
-
-
-class PyFilamentLower:
-    def __init__(self):
-        pass
+    def new(self) -> Fsm:
+        return Fsm(comp=self.ctx, states=self.states)
     
-    def split_namespace(self, namespace:str) -> list[str]:
-        components = re.findall(r"comp\s+\w+<[^>]*>\([^)]*\)\s*->\s*\([^)]*\)\s*\{[^}]*\}", namespace, re.DOTALL)
-        return components
+    def eval_event(self, event:str):
 
-    def extract_comp_data(self, components: List[str]) -> dict[str, Component]:
-        data = {}
+        G = 0  # Assign the base value for G (e.g., G = 0)
+        try:
+            return eval(event)  # Evaluate the symbolic expression
+        except NameError:
+            raise ValueError(f"Invalid symbolic expression: {event}")
 
-        for component_str in components:
-            # Parse the component using the Component class
-            component = Component.parse(component_str)
+    def determine_states(self, ports:list[Port]) -> int:
+        unique_events = set()
 
-            # Add the parsed component to the dictionary using its name as the key
-            if component.name:
-                data[component.name] = component
+        for port in ports:
+            start, end = port.range_  # Unpack the range
+            unique_events.add(start)
+            unique_events.add(end)
 
-        return data
+        # Evaluate unique symbolic expressions like G and G+1
+        # Convert them into concrete indices if needed.
+        concrete_events = {self.eval_event(event) for event in unique_events}
+        return len(concrete_events)
 
+    def connect_register(self, reg_name, cmd):
+        if reg_name == cmd.function:
+            # Find the index of the Invoke command to insert after it
+            index = self.ctx.commands.index(cmd)
+            # Append the Connect commands immediately after the Invoke command
+            self.ctx.commands[index + 1:index + 1] = [
+                Connect(dest=f"{cmd.variable}.write_en", 
+                        src=self.fsm.port(self.eval_event(cmd.range_[0]))),
+                Connect(dest=f"{cmd.variable}.in", 
+                        src=self.fsm.port(self.eval_event(cmd.range_[0])), 
+                        guard=cmd.ports[0])
+            ]
 
-    def _parse_command(self, command_str: str) -> Union[Instance, Invoke, Connect]:
-        command_str = command_str.strip()
+    def connect_comp(self, obj_name, cmd):
+        if obj_name == cmd.function:
+            # Find the index of the Invoke command to insert after it
+            index = self.ctx.commands.index(cmd)
+            # Append the Connect commands immediately after the Invoke command
+            self.ctx.commands[index + 1:index + 1] = [
+                Connect(dest=f"{cmd.variable}.left", 
+                        src=self.fsm.port(self.eval_event(cmd.range_)),
+                        guard=cmd.ports[0]),
+                Connect(dest=f"{cmd.variable}.right", 
+                        src=self.fsm.port(self.eval_event(cmd.range_)), 
+                        guard=cmd.ports[1])
+            ]
 
-        if ":=" in command_str and "new" in command_str:
-            return Instance.parse(command_str)
+    def connect_fsm_ports(self):
+        # Fetch invoke commands
+        invokes = [cmd for cmd in self.ctx.commands if isinstance(cmd, Invoke)]
+        registers = [cmd.variable for cmd in self.ctx.commands if isinstance(cmd, Instance) and cmd.type_name == "Register"]
+        objects = [cmd.variable for cmd in self.ctx.commands if isinstance(cmd, Instance) and cmd.type_name != "Register"]
 
-        if ":=" in command_str and "new" not in command_str:
-            return Invoke.parse(command_str)
+        for reg_name in registers:
+            for cmd in invokes:
+                self.connect_register(reg_name, cmd)
 
-        if "=" in command_str:
-            return Connect.parse(command_str)
+        for obj_name in objects:
+            for cmd in invokes:
+                self.connect_comp(obj_name, cmd)
 
-        raise ValueError(f"Unknown command type: {command_str}")
+    def fsm_command(self):
+        return self.fsm
 
-    def convert_commands_to_objects(self, components: dict[str, List[str]]) -> dict[str, List[Command]]:
-        result = {}
-        for component_name, commands in components.items():
-            result[component_name] = [self._parse_command(command) for command in commands]
-        return result
+    def generate(ctx: Component):
+        generator = FSMgen(ctx)
+        generator.connect_fsm_ports()
+        generator.ctx.commands.append(generator.fsm_command())
 
+        return ctx
 
 if __name__ == "__main__":
-    test_lower = PyFilamentLower()
 
-    ns = """
-            comp main<G: 1>(@interface[G] go: 1, @[G, G+1] left: 32, @[G, G+1] right: 32, @[G+1, G+2] opt: 32) -> (@[G+3, G+4] out: 32) {
-                A := new And[32];
-                a0 := A<G>(left,right);
-                AND_STAGE := new Register[32];
-                and_stage := AND_STAGE<G,G+2>(a0.out);
-                X := new Xor[32];
-                x0 := X<G+1>(and_stage.out,opt);
-                XOR_STAGE := new Register[32];
-                xor_stage := XOR_STAGE<G+1,G+3>(x0.out);
-                R0 := new Register[32];
-                r0 := R0<G+2,G+4>(xor_stage.out);
-                out = r0.out;
-            }
-            """
+    test_component = Component(
+        signature=Signature(
+            name='main',
+            event='G',
+            interface=InterfacePort(
+                name='go',
+                event='G',
+                width=1
+            ),
+            in_ports= [
+                Port(name='left', direction='in', range_=('G', 'G+1'), width=32),
+                Port(name='right', direction='in', range_=('G', 'G+1'), width=32),
+                Port(name='opt', direction='in', range_=('G+1', 'G+2'), width=32),
+            ],
+            out_ports= [
+                Port(name='out', direction='out', range_=('G+2', 'G+3'), width=32),
+            ]
+        ),
+        commands = [
+            Instance(variable="A", type_name="And", size=32),
+            Instance(variable="X", type_name="Xor", size=32),
+            Instance(variable="AND_STAGE", type_name="Register", size=32),
+            Instance(variable="XOR_STAGE", type_name="Register", size=32),
+            Instance(variable="R0", type_name="Register", size=32),
 
-    comps = test_lower.split_namespace(ns)
-    comp_d = test_lower.extract_comp_data(comps)
+            Invoke(variable="a0", function="A", range_=("G"), ports=["left", "right"]),
+            Invoke(variable="and_stage", function="AND_STAGE", range_=("G","G+2"), ports=["a0.out"]),
+            Invoke(variable="x0", function="X", range_=("G+1"), ports=["and_stage.out", "opt"]),
+            Invoke(variable="xor_stage", function="XOR_STAGE", range_=("G+1", "G+3"), ports=["x0.out"]),
+            Invoke(variable="r0", function="R0", range_=("G+2","G+4"), ports=["xor_stage.out"]),
 
-    cmd_objs = test_lower.convert_commands_to_objects(comp_d)
+            Connect(src="r0.out", dest="out"),
+        ]
+    )
 
-    for obj in cmd_objs.values():
-        for cmd in obj:
-            print(cmd)
+    generate_lower(test_component)
