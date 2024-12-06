@@ -11,7 +11,7 @@ def generate_lower(component: Component):
             component (Component): Component to be transformed.
         """
     lower_fil = FSMgen.generate(component)
-    print(lower_fil)
+    return lower_fil
 
 class FSMgen:
     def __init__(self, ctx:Component):
@@ -27,12 +27,12 @@ class FSMgen:
         return Fsm(comp=self.ctx, states=self.states)
     
     def eval_event(self, event:str):
-
-        G = 0  # Assign the base value for G (e.g., G = 0)
-        try:
-            return eval(event)  # Evaluate the symbolic expression
-        except NameError:
-            raise ValueError(f"Invalid symbolic expression: {event}")
+        if isinstance(event, str):
+            G = 0  # Assign the base value for G (e.g., G = 0)
+            try:
+                return eval(event)  # Evaluate the symbolic expression
+            except NameError:
+                raise ValueError(f"Invalid symbolic expression: {event}")
 
     def determine_states(self, ports:list[Port]) -> int:
         unique_events = set()
@@ -67,10 +67,10 @@ class FSMgen:
             # Append the Connect commands immediately after the Invoke command
             self.ctx.commands[index + 1:index + 1] = [
                 Connect(dest=f"{cmd.variable}.left", 
-                        src=self.fsm.port(self.eval_event(cmd.range_)),
+                        src=self.fsm.port(self.eval_event(cmd.range_[0])),
                         guard=cmd.ports[0]),
                 Connect(dest=f"{cmd.variable}.right", 
-                        src=self.fsm.port(self.eval_event(cmd.range_)), 
+                        src=self.fsm.port(self.eval_event(cmd.range_[0])), 
                         guard=cmd.ports[1])
             ]
 
@@ -97,42 +97,3 @@ class FSMgen:
         generator.ctx.commands.append(generator.fsm_command())
 
         return ctx
-
-if __name__ == "__main__":
-
-    test_component = Component(
-        signature=Signature(
-            name='main',
-            event='G',
-            interface=InterfacePort(
-                name='go',
-                event='G',
-                width=1
-            ),
-            in_ports= [
-                Port(name='left', direction='in', range_=('G', 'G+1'), width=32),
-                Port(name='right', direction='in', range_=('G', 'G+1'), width=32),
-                Port(name='opt', direction='in', range_=('G+1', 'G+2'), width=32),
-            ],
-            out_ports= [
-                Port(name='out', direction='out', range_=('G+2', 'G+3'), width=32),
-            ]
-        ),
-        commands = [
-            Instance(variable="A", type_name="And", size=32),
-            Instance(variable="X", type_name="Xor", size=32),
-            Instance(variable="AND_STAGE", type_name="Register", size=32),
-            Instance(variable="XOR_STAGE", type_name="Register", size=32),
-            Instance(variable="R0", type_name="Register", size=32),
-
-            Invoke(variable="a0", function="A", range_=("G"), ports=["left", "right"]),
-            Invoke(variable="and_stage", function="AND_STAGE", range_=("G","G+2"), ports=["a0.out"]),
-            Invoke(variable="x0", function="X", range_=("G+1"), ports=["and_stage.out", "opt"]),
-            Invoke(variable="xor_stage", function="XOR_STAGE", range_=("G+1", "G+3"), ports=["x0.out"]),
-            Invoke(variable="r0", function="R0", range_=("G+2","G+4"), ports=["xor_stage.out"]),
-
-            Connect(src="r0.out", dest="out"),
-        ]
-    )
-
-    generate_lower(test_component)

@@ -31,51 +31,17 @@ comp main<G: 1>(
    (out-port[32] ((+ G 2) (+ G 3)) out))
   (instantiate
    (A (new And[32]))
-   (X (new Xor[32])))
+   (X (new Xor[32]))
+   (AND_STAGE (new Register[32]))
+   (XOR_STAGE (new Register[32]))
+   (R0 (new Register[32])))
   (invoke
    (a0 (A (G) left right))
-   (x0 (X (+ G 1) a0 opt)))
-  (connect (out x0))
+   (and_stage (AND_STAGE (G (+ G 2)) a0.out))
+   (x0 (X (+ G 1) and_stage.out opt))
+   (xor_stage (AND_STAGE ((+ G 1) (+ G 3)) x0.out))
+   (r0 (R0 ((+ G 2) (+ G 4)) xor_stage.out))
+   )
+  (connect (out r0.out))
 ; (constraints (> L G)) ; optional constraints over events, if there are multiple events
-)
-
-main = Component(
-    signature=Signature(
-        name='main',
-        event='G',
-        interface=InterfacePort(
-            name='go',
-            event='G',
-            width=1
-        ),
-        in_ports= [
-            Port(
-                name='left', direction='in', range_=('G', 'G+1'), width=32),
-            Port(
-                name='right', direction='in', range_=('G', 'G+1'), width=32),
-            Port(
-                name='opt', direction='in', range_=('G+1', 'G+2'), width=32),
-        ],
-        out_ports= [
-            Port(
-                name='out', direction='out', range_=('G+2', 'G+3'), width=32),
-        ]
-    ),
-    commands= [
-        Instance(
-            variable='A', type_name='And', size=32
-        ),
-        Instance(
-            variable='X', type_name='Xor', size=32
-        ),
-        Invoke(
-            variable='a0', function='A', range_='G', inputs=['left','right']
-        ),
-        Invoke(
-            variable='x0', function='X', range_='G+1', inputs=['a0.out', 'opt']
-        ),
-        Connect(
-            source='x0.out', target='out'
-        )
-    ]
 )

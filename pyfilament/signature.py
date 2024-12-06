@@ -8,7 +8,7 @@ class Signature:
     def __init__(
         self,
         name: str,
-        event: str,
+        event: list,
         interface: InterfacePort,
         in_ports: List[Port],
         out_ports: List[Port],
@@ -42,4 +42,7 @@ class Signature:
     def __repr__(self):
         in_ports_str = ", ".join(repr(p) for p in self.in_ports)
         out_ports_str = ", ".join(repr(p) for p in self.out_ports)
-        return f"{self.name}<{self.event}>({self.interface}, {in_ports_str}) -> ({out_ports_str})"
+        for e in self.event:
+            e = str(e)
+            event_str = e.strip('()').split()[1] if e.strip('()').startswith('event') else None
+        return f"{self.name}<{event_str}>({self.interface}, {in_ports_str}) -> ({out_ports_str})"

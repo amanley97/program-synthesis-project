@@ -3,13 +3,17 @@ import pyfilament as pyf
 
 
 if __name__ == '__main__':
-    expr = pyf.parse_file("example.txt")[0]
-    comp = pyf.Component.from_sexpr(expr)
-    constraints = pyf.solve_component_constraints(comp)
-    print(expr)
-    print(comp)
-    print(constraints)
+    expr = pyf.parse_file("example.fil")[0]
+    print(f"S-Expression Form: \n-----\n{expr}\n")
 
+    comp = pyf.Component.from_sexpr(expr)
+    print(f"Component Object Form: \n-----\n{comp}\n")
+
+    # constraints = pyf.solve_component_constraints(comp)
+    # print(constraints)
+
+    lower_fil = pyf.generate_lower(comp)
+    print(f"Lower Filament Form: \n-----\n{lower_fil}\n")
 
 """
 comp main<G: 1>(

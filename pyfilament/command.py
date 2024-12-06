@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from pyfilament.sexpr import SExpr, eval_expr
-
+from pyfilament.port import Port
 # from component import Signature
 
 
@@ -65,18 +65,18 @@ class Invoke(Command):
     def from_sexpr(sexpr: SExpr):
         name = sexpr[0]
         function = sexpr[1][0]
-        range_ = sexpr[1][1]
+        range_ = Port.parse_range_expression(str(sexpr[1][1]))
         ports = sexpr[1][2:]
         return Invoke(name, function, range_, ports)
 
     def __repr__(self):
         ports_str = ", ".join(self.ports)
-        # if len(self.range_) == 2:
-        #     range_str = f"{self.range_[0]}, {self.range_[1]}"
-        # else:
-        #     range_str = f"{self.range_[0]}"
-        # range_str = eval_expr(self.range_)
-        return f"{self.variable} := invoke {self.function}<{self.range_}>({ports_str});"
+        if len(self.range_) > 1:
+            range_str = f"{self.range_[0]}, {self.range_[1]}"
+        else:
+            range_str = f"{self.range_[0]}"
+        range_str = eval_expr(range_str)
+        return f"{self.variable} := invoke {self.function}<{range_str}>({ports_str});"
 
 
 class Connect(Command):

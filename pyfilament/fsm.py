@@ -8,7 +8,7 @@ class Fsm:
         self.component = comp
         self.states = states
         self.trigger = comp.signature.interface
-        self.name = f"{self.trigger.event}_fsm"
+        self.name = f"{self.trigger.event[0]}_fsm"
 
 
     def __repr__(self):
