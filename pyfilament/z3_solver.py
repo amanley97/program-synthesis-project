@@ -1,5 +1,10 @@
 from z3 import Int, Solver, Or, And, Implies
 
+from pyfilament.command import Instance, Invoke, Connect
+from pyfilament.component import Component
+from pyfilament.signature import Signature
+from pyfilament.port import Port, InterfacePort
+
 
 def solve_component_constraints(component):
     """
