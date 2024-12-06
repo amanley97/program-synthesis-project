@@ -45,12 +45,16 @@ def parse_expr(source: str) -> Tuple[SExpr, int]:
     current_term = ""
 
     while pos < len(source):
-        if source[pos].isalnum() or is_operator(source[pos]) or source[pos] in ('[', ']'):
+        if (
+            source[pos].isalnum()
+            or is_operator(source[pos])
+            or source[pos] in ("[", "]")
+        ):
             current_term += source[pos]
         else:
-            if source[pos] == ';': # comment
+            if source[pos] == ";":  # comment
                 append_if_nonempty(current_term, expr)
-                while source[pos] != '\n':
+                while source[pos] != "\n":
                     pos += 1
             if len(current_term) > 0:
                 append_if_nonempty(current_term, expr)
@@ -84,7 +88,7 @@ def parse(source: str) -> List[SExpr]:
     exprs = []
     pos = 0
     while pos < len(source):
-        while pos < len(source) and source[pos] != '(':
+        while pos < len(source) and source[pos] != "(":
             pos += 1
         if pos >= len(source):
             break

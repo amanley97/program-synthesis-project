@@ -16,7 +16,7 @@ class SExpr:
             for i, item in enumerate(self.as_list):
                 if isinstance(item, str):
                     if item == key and i + 1 < len(self):
-                        return self[i+1]
+                        return self[i + 1]
                 elif isinstance(item, SExpr):
                     if len(item) > 0 and isinstance(item[0], str):
                         if item[0] == key:

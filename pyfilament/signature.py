@@ -3,8 +3,16 @@ from typing import List
 from port import Port, InterfacePort
 from sexpr import SExpr
 
+
 class Signature:
-    def __init__(self, name: str, event: str, interface: InterfacePort, in_ports: List[Port], out_ports: List[Port]):
+    def __init__(
+        self,
+        name: str,
+        event: str,
+        interface: InterfacePort,
+        in_ports: List[Port],
+        out_ports: List[Port],
+    ):
         self.name = name
         self.event = event
         self.interface = interface
@@ -34,4 +42,4 @@ class Signature:
     def __repr__(self):
         in_ports_str = ", ".join(repr(p) for p in self.in_ports)
         out_ports_str = ", ".join(repr(p) for p in self.out_ports)
-        return (f"{self.name}<{self.event}>({self.interface}, {in_ports_str}) -> ({out_ports_str})")
+        return f"{self.name}<{self.event}>({self.interface}, {in_ports_str}) -> ({out_ports_str})"

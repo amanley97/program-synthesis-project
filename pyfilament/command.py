@@ -1,7 +1,9 @@
 from typing import List, Optional
 
 from sexpr import SExpr
+
 # from component import Signature
+
 
 class Command:
     def __init__(self):
@@ -34,12 +36,13 @@ class Instance(Command):
     def from_sexpr(sexpr: SExpr):
         name = sexpr[0]
         definition = sexpr[1][1]
-        start, stop = definition.find('['), definition.find(']')
+        start, stop = definition.find("["), definition.find("]")
         if start == -1 or stop == -1:
             raise RuntimeError("No width for instantiation")
         type_name = definition[:start]
-        width = definition[start+1:stop]
+        width = definition[start + 1 : stop]
         return Instance(name, type_name, width)
+
 
 class Invoke(Command):
     def __init__(self, variable: str, function: str, range_: tuple, ports: List[str]):
@@ -62,11 +65,11 @@ class Invoke(Command):
     def from_sexpr(sexpr: SExpr):
         name = sexpr[0]
         definition = sexpr[1][1]
-        start, stop = definition.find('['), definition.find(']')
+        start, stop = definition.find("["), definition.find("]")
         if start == -1 or stop == -1:
             raise RuntimeError("No width for instantiation")
         type_name = definition[:start]
-        width = definition[start+1:stop]
+        width = definition[start + 1 : stop]
         return Instance(name, type_name, width)
 
     def __repr__(self):
