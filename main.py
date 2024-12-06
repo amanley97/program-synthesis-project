@@ -1,15 +1,19 @@
 # from z3 import *
 import pyfilament as pyf
+from argparse import ArgumentParser
 
+argv = ArgumentParser()
+argv.add_argument("filename")
 
 if __name__ == '__main__':
-    expr = pyf.parse_file("example.fil")[0]
+    args = argv.parse_args()
+    expr = pyf.parse_file(args.filename)[0]
     print(f"S-Expression Form: \n-----\n{expr}\n")
 
     comp = pyf.Component.from_sexpr(expr)
     print(f"Component Object Form: \n-----\n{comp}\n")
 
-    # constraints = pyf.solve_component_constraints(comp)
+    constraints = pyf.solve_component_constraints(comp)
     # print(constraints)
 
     lower_fil = pyf.generate_lower(comp)

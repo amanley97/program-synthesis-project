@@ -58,6 +58,16 @@ def can_eval(expr: SExpr | str) -> bool:
             raise TypeError("Expected SExpr or string")
 
 
+def print_expr(expr: SExpr):
+    """
+    expects (G) or (+ G 3)
+    """
+    if len(expr) == 1:
+        return expr[0]
+    elif len(expr) == 3:
+        return f"{expr[1]} {expr[0]} {expr[2]}"
+
+
 def eval_expr(expr: SExpr | str):
     """
     Turns an arithmetic SExpr into a Z3 expression that can be used as part of a constraint

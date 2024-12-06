@@ -1,12 +1,13 @@
-from z3 import Int, Solver, Or, And, Implies
+from z3 import sat, Int, Solver, Or, And, Implies
 
 from pyfilament.command import Instance, Invoke, Connect
 from pyfilament.component import Component
 from pyfilament.signature import Signature
 from pyfilament.port import Port, InterfacePort
+from pyfilament.sexpr import can_eval, eval_expr
 
 
-def solve_component_constraints(component):
+def solve_component_constraints(component: Component):
     """
     Argsuments- component: A Component instance containing its signature and commands.
 
@@ -17,14 +18,22 @@ def solve_component_constraints(component):
     # Define start times for all commands
     start_times = {cmd.variable: Int(f"{cmd.variable}_start") for cmd in component.commands if hasattr(cmd, 'variable')}
 
+    # use ports from signature
+    for port in component.signature.in_ports:
+        start_times[port.name] = eval_expr(port.range_[0])
+    for port in component.signature.out_ports:
+        start_times[port.name] = eval_expr(port.range_[0])
+
     # Define FSM states and add state constraints
     # here event is a list of event definitions as SExprs
     fsm_states = component.signature.event[0][1]
     states = {f"{fsm_states}_{i}": Int(f"{fsm_states}_{i}_active") for i in range(4)}  # Assuming 4 cycles
 
+    solver.add(Int("G") == 0)
     # Timing constraints for commands
     for cmd in component.commands:
         if isinstance(cmd, Instance):
+            # pass
             solver.add(start_times[cmd.variable] >= 0)  # Non-negative start time
 
         elif isinstance(cmd, Invoke):
@@ -34,8 +43,10 @@ def solve_component_constraints(component):
             elif len(cmd.range_) == 2:
                 solver.add(start_times[cmd.variable] >= range_to_cycle(cmd.range_[0]))
                 solver.add(start_times[cmd.variable] <= range_to_cycle(cmd.range_[1]))
+            elif len(cmd.range_) == 3:
+                solver.add(start_times[cmd.variable] == 3)
             else:
-                raise RuntimeError(f"Too many timing constraints in invocation - {cmd}")
+                raise RuntimeError(f"Too many timing constraints in invocation - {cmd}: {cmd.range_}")
             # range_start, range_end = map(range_to_cycle, cmd.range_)
             # solver.add(start_times[cmd.variable] >= range_start)
             # solver.add(start_times[cmd.variable] <= range_end)
@@ -59,14 +70,16 @@ def solve_component_constraints(component):
             solver.add(Implies(states[f"{fsm_states}_{cycle}"] == 1, states[f"{fsm_states}_{cycle + 1}"] == 1))
 
     # Solve constraints
-    if solver.check() == "sat":
+    if solver.check() == sat:
         model = solver.model()
+        print(model)
         results = {
-            "start_times": {cmd.variable: model[start_times[cmd.variable]].as_long() for cmd in start_times},
+            "start_times": start_times,
             "states": {state: model[states[state]].as_long() for state in states},
         }
         return results
     else:
+        # print(solver.assertions())
         return None
 
 

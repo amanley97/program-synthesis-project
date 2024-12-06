@@ -18,8 +18,7 @@
    (and (ANDSTAGE (G (+ G 2)) a0.out))
    (x0 (X (+ G 1) and.out opt))
    (xor (XORSTAGE ((+ G 1) (+ G 3)) x0.out))
-   (r0 (R0 ((+ G 2) (+ G 4)) xor.out))
-   )
+   (r0 (R0 ((+ G 2) (+ G 4)) xor.out)))
   (connect (out r0.out))
-; (constraints (> L G)) ; optional constraints over events, if there are multiple events
+; (constraints (> L G)) ; optional constraints over events, if there were multiple events
 )

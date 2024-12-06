@@ -48,7 +48,7 @@ def parse_expr(source: str) -> Tuple[SExpr, int]:
         if (
             source[pos].isalnum()
             or is_operator(source[pos])
-            or source[pos] in ("[", "]")
+            or source[pos] in ("[", "]", "_", "'", ".")
         ):
             current_term += source[pos]
         else:
