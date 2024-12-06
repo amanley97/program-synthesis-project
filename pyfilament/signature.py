@@ -1,7 +1,7 @@
 from typing import List
 
-from port import Port, InterfacePort
-from sexpr import SExpr
+from pyfilament.port import Port, InterfacePort
+from pyfilament.sexpr import SExpr
 
 
 class Signature:

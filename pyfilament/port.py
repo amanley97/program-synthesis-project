@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from sexpr import SExpr
+from pyfilament.sexpr import SExpr
 
 class Direction(Enum):
     IN = 0

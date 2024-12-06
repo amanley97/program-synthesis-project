@@ -1,7 +1,7 @@
-from command import Invoke, Instance, Connect
-from component import Component, Signature
-from port import Port, InterfacePort
-from fsm import Fsm
+from pyfilament.command import Invoke, Instance, Connect
+from pyfilament.component import Component, Signature
+from pyfilament.port import Port, InterfacePort
+from pyfilament.fsm import Fsm
 
 def generate_lower(component: Component):
     """

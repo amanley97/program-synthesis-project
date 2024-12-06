@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sexpr import SExpr
+from pyfilament.sexpr import SExpr
 
 # from component import Signature
 

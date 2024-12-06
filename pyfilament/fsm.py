@@ -1,4 +1,4 @@
-from component import Component
+from pyfilament.component import Component
 
 class Fsm:
     def __init__(self, comp:Component, states:int):

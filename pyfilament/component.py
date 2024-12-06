@@ -1,9 +1,9 @@
 from typing import List
 
-from signature import Signature
-from command import Command, Instance, Invoke
-from port import Port, InterfacePort
-from sexpr import SExpr
+from pyfilament.signature import Signature
+from pyfilament.command import Command, Instance, Invoke
+from pyfilament.port import Port, InterfacePort
+from pyfilament.sexpr import SExpr
 
 
 class Component:
