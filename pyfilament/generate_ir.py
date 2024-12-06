@@ -1,4 +1,5 @@
-from pyfilament.data import Port, Direction, Event
+from pyfilament.event import Event
+from pyfilament.port import Port, Direction
 from pyfilament.fsm import Fsm
 from pyfilament.signature import Signature
 from pyfilament.sexpr import SExpr
