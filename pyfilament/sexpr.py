@@ -10,7 +10,7 @@ class SExpr:
             raise RuntimeError("Expression is not arithmetic")
 
     def __getitem__(self, key):
-        if isinstance(key, int):
+        if isinstance(key, int) or isinstance(key, slice):
             return self.as_list[key]
         elif isinstance(key, str):
             for i, item in enumerate(self.as_list):
@@ -70,7 +70,9 @@ def eval_expr(expr: SExpr | str):
                 return Int(expr)
             raise RuntimeError(f"Unable to evaluate {expr} as arithmetic expression")
         case SExpr():
-            if len(expr) != 3:
+            if len(expr) == 1:
+                return eval_expr(expr[0])
+            elif len(expr) != 3:
                 raise RuntimeError(f"Invalid arithmetic expression: {expr}")
             match expr[0]:
                 case str(head):

@@ -18,7 +18,8 @@ def solve_component_constraints(component):
     start_times = {cmd.variable: Int(f"{cmd.variable}_start") for cmd in component.commands if hasattr(cmd, 'variable')}
 
     # Define FSM states and add state constraints
-    fsm_states = component.signature.event
+    # here event is a list of event definitions as SExprs
+    fsm_states = component.signature.event[0][1]
     states = {f"{fsm_states}_{i}": Int(f"{fsm_states}_{i}_active") for i in range(4)}  # Assuming 4 cycles
 
     # Timing constraints for commands
@@ -28,16 +29,28 @@ def solve_component_constraints(component):
 
         elif isinstance(cmd, Invoke):
             # Add timing constraints based on range
-            range_start, range_end = map(range_to_cycle, cmd.range_)
-            solver.add(start_times[cmd.variable] >= range_start)
-            solver.add(start_times[cmd.variable] <= range_end)
+            if len(cmd.range_) == 1:
+                solver.add(start_times[cmd.variable] == range_to_cycle(cmd.range_[0]))
+            elif len(cmd.range_) == 2:
+                solver.add(start_times[cmd.variable] >= range_to_cycle(cmd.range_[0]))
+                solver.add(start_times[cmd.variable] <= range_to_cycle(cmd.range_[1]))
+            else:
+                raise RuntimeError(f"Too many timing constraints in invocation - {cmd}")
+            # range_start, range_end = map(range_to_cycle, cmd.range_)
+            # solver.add(start_times[cmd.variable] >= range_start)
+            # solver.add(start_times[cmd.variable] <= range_end)
 
         elif isinstance(cmd, Connect):
             # Ensure connection happens only after the source produces its output
             src_start_time = start_times.get(cmd.src.split('.')[0], None)
             dest_start_time = start_times.get(cmd.dest.split('.')[0], None)
-            if src_start_time and dest_start_time:
+            if src_start_time is not None and dest_start_time is not None:
                 solver.add(dest_start_time >= src_start_time)
+            else:
+                if src_start_time is None:
+                    raise RuntimeError(f"Missing start time for variable {cmd.src}")
+                elif dest_start_time is None:
+                    raise RuntimeError(f"Missing start time for variable {cmd.dest}")
 
     # FSM constraints
     for cycle in range(4):  # Assume 4 cycles for the example
@@ -62,6 +75,9 @@ def range_to_cycle(range_expr):
     Convert a range expression (e.g., 'G', 'G+1') to a cycle number.
     """
     # Map ranges to cycle numbers for simplicity
+    if len(range_expr) == 1:
+        return 0
+    return range_expr[2]
     mapping = {'G': 0, 'G+1': 1, 'G+2': 2, 'G+3': 3}
     return mapping.get(range_expr, -1)
 

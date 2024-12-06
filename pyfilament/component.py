@@ -1,7 +1,7 @@
 from typing import List
 
 from pyfilament.signature import Signature
-from pyfilament.command import Command, Instance, Invoke
+from pyfilament.command import Command, Instance, Invoke, Connect
 from pyfilament.port import Port, InterfacePort
 from pyfilament.sexpr import SExpr
 
@@ -19,8 +19,10 @@ class Component:
     def from_sexpr(expr: SExpr):
         signature = Signature.from_sexpr(expr)
         commands = []
-        # for command in expr["instantiate"]:
-        #     commands.append(Instance.from_sexpr(signature, command))
-        # for command in expr["invoke"]:
-        #     commands.append(Invoke.from_sexpr(signature, command))
+        for command in expr["instantiate"]:
+            commands.append(Instance.from_sexpr(command))
+        for command in expr["invoke"]:
+            commands.append(Invoke.from_sexpr(command))
+        for command in expr["connect"]:
+            commands.append(Connect.from_sexpr(command))
         return Component(signature, commands)

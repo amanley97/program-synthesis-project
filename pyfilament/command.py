@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pyfilament.sexpr import SExpr
+from pyfilament.sexpr import SExpr, eval_expr
 
 # from component import Signature
 
@@ -64,21 +64,19 @@ class Invoke(Command):
     @staticmethod
     def from_sexpr(sexpr: SExpr):
         name = sexpr[0]
-        definition = sexpr[1][1]
-        start, stop = definition.find("["), definition.find("]")
-        if start == -1 or stop == -1:
-            raise RuntimeError("No width for instantiation")
-        type_name = definition[:start]
-        width = definition[start + 1 : stop]
-        return Instance(name, type_name, width)
+        function = sexpr[1][0]
+        range_ = sexpr[1][1]
+        ports = sexpr[1][2:]
+        return Invoke(name, function, range_, ports)
 
     def __repr__(self):
         ports_str = ", ".join(self.ports)
-        if len(self.range_) == 2:
-            range_str = f"{self.range_[0]}, {self.range_[1]}"
-        else:
-            range_str = f"{self.range_[0]}"
-        return f"{self.variable} := invoke {self.function}<{range_str}>({ports_str});"
+        # if len(self.range_) == 2:
+        #     range_str = f"{self.range_[0]}, {self.range_[1]}"
+        # else:
+        #     range_str = f"{self.range_[0]}"
+        # range_str = eval_expr(self.range_)
+        return f"{self.variable} := invoke {self.function}<{self.range_}>({ports_str});"
 
 
 class Connect(Command):
@@ -95,6 +93,12 @@ class Connect(Command):
         self.dest = dest
         self.src = src
         self.guard = guard
+
+    @staticmethod
+    def from_sexpr(sexpr: SExpr):
+        dest = sexpr[0]
+        src = sexpr[1]
+        return Connect(dest, src, None)
 
     def __repr__(self):
         guard_str = f" ? {self.guard}" if self.guard else ""

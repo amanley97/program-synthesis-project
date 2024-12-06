@@ -11,8 +11,8 @@
    (A (new And[32]))
    (X (new Xor[32])))
   (invoke
-   (a0 (A (G) left right))
-   (x0 (X (+ G 1) a0 opt)))
+   (a0 (A ((G) (+ G 1)) left right))
+   (x0 (X ((+ G 1)) a0 opt)))
   (connect (out x0))
 ; (constraints (> L G)) ; optional constraints over events, if there are multiple events
 )

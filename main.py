@@ -3,8 +3,12 @@ import pyfilament as pyf
 
 
 if __name__ == '__main__':
-    expr = pyf.parse_file("example.txt")
+    expr = pyf.parse_file("example.txt")[0]
+    comp = pyf.Component.from_sexpr(expr)
+    constraints = pyf.solve_component_constraints(comp)
     print(expr)
+    print(comp)
+    print(constraints)
 
 
 """
