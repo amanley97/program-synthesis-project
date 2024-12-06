@@ -1,4 +1,4 @@
-from z3 import Int
+from z3 import Int, ArithRef
 
 
 class SExpr:
@@ -58,7 +58,7 @@ def can_eval(expr: SExpr | str) -> bool:
             raise TypeError("Expected SExpr or string")
 
 
-def eval_expr(expr: SExpr | str) -> bool:
+def eval_expr(expr: SExpr | str):
     """
     Turns an arithmetic SExpr into a Z3 expression that can be used as part of a constraint
     """

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from pyfilament.sexpr import SExpr
 
@@ -21,29 +21,12 @@ def is_operator(c):
     return c in ("+", "-", "*", "/", ">", "<", "=")
 
 
-def parse_timing(source: str) -> str:
-    """
-    Extract timing constraints from a source string, if present.
-    For example:
-        "@ clk" -> "clk"
-        "@ [clk, clk+1]" -> "[clk, clk+1]"
-    """
-    if "@" not in source:
-        return None, source.strip()
-
-    parts = source.split("@", maxsplit=1)
-    expr_part = parts[0].strip()
-    timing_part = parts[1].strip()
-
-    return timing_part, expr_part
-
-
-def append_if_nonempty(s: str, l: List[str]):
+def append_if_nonempty(s: str | SExpr, l: List[str | SExpr]):
     if len(s) > 0:
         l.append(s)
 
 
-def parse_expr(source: str) -> SExpr:
+def parse_expr(source: str) -> Tuple[SExpr, int]:
     """
     Parse a string into an S-expression representation.
     """
