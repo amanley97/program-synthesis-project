@@ -24,11 +24,9 @@ class CalyxIRGenerator:
         ports = []
         for port in signature.inputs + signature.outputs:
             direction = Direction.INPUT if port.is_input else Direction.OUTPUT
-            ports.append({
-                "name": port.name,
-                "width": port.bitwidth,
-                "direction": direction
-            })
+            ports.append(
+                {"name": port.name, "width": port.bitwidth, "direction": direction}
+            )
         return ports
 
     def create_calyx_component(self, filament_component):
@@ -40,7 +38,7 @@ class CalyxIRGenerator:
             "name": filament_component.signature.name,
             "ports": ports,
             "body": [],
-            "attributes": {"nointerface": True}
+            "attributes": {"nointerface": True},
         }
         return calyx_component
 
@@ -61,14 +59,14 @@ class CalyxIRGenerator:
             cell = {
                 "name": instance.name,
                 "component": signature.name,
-                "ports": signature.ports
+                "ports": signature.ports,
             }
         else:
             # Create a new primitive
             cell = {
                 "name": instance.name,
                 "component": instance.component,
-                "bindings": instance.bindings
+                "bindings": instance.bindings,
             }
         context.instances[instance.name] = cell
 
@@ -79,11 +77,7 @@ class CalyxIRGenerator:
         src, guard_src = context.compile_port(connection.src)
         dst, guard_dst = context.compile_port(connection.dst)
         guard = guard_src if guard_src else guard_dst
-        assignment = {
-            "dst": dst,
-            "src": src,
-            "guard": guard
-        }
+        assignment = {"dst": dst, "src": src, "guard": guard}
         context.calyx_component["body"].append(assignment)
 
     def generate_ir(self, filament_component):
@@ -111,6 +105,7 @@ class Context:
     """
     helper class to manage bindings and instances during IR generation.
     """
+
     def __init__(self, library, binding):
         self.library = library
         self.binding = binding
@@ -123,7 +118,10 @@ class Context:
         Translate Filament ports into Calyx IR ports.
         """
         if port.type == "constant":
-            return {"name": f"const_{port.constant_value}", "width": port.bitwidth}, None
+            return {
+                "name": f"const_{port.constant_value}",
+                "width": port.bitwidth,
+            }, None
         elif port.type == "this":
             return {"name": port.name}, None
         elif port.type == "invocation":
@@ -133,7 +131,6 @@ class Context:
             raise ValueError(f"Unknown invocation target: {port.invoke}")
         else:
             raise ValueError(f"Unknown port type: {port.type}")
-
 
 
 # I assumed`filament_component` is a parsed Filament component object.

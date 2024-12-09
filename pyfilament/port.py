@@ -3,10 +3,12 @@ from typing import Optional, List
 
 from pyfilament.sexpr import SExpr
 
+
 class Direction(Enum):
     IN = 0
     OUT = 1
     INTERFACE = 2
+
 
 class Port:
     def __init__(self, name: str, direction: Direction, range_: tuple, width: int):
@@ -32,11 +34,11 @@ class Port:
             direction = Direction.INTERFACE
         else:
             raise RuntimeError(f"Invalid direction for port: {sexpr}")
-        
-        start, stop = sexpr[0].find('['), sexpr[0].find(']')
+
+        start, stop = sexpr[0].find("["), sexpr[0].find("]")
         if start == -1 or stop == -1:
             raise RuntimeError(f"No width specified for port: {sexpr}")
-        width = int(sexpr[0][start+1:stop])
+        width = int(sexpr[0][start + 1 : stop])
         range_ = sexpr[1]
         name = sexpr[2]
         if direction == Direction.INTERFACE:
@@ -46,6 +48,7 @@ class Port:
     def __repr__(self):
         range_str = f"{self.range_[0]}, {self.range_[1]}"
         return f"@[{range_str}] {self.name}: {self.width}"
+
 
 class InterfacePort(Port):
     def __init__(self, name: str, event: tuple, width: int):
