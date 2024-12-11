@@ -5,7 +5,16 @@ from pyfilament.sexpr import SExpr
 class Range:
     def __init__(self, lo: str | SExpr, hi: Optional[str | SExpr]=None):
         self.lo = Event(lo)
-        self.hi = Event(hi)
+        if hi is not None:
+            self.hi = Event(hi)
+        else:
+            self.hi = None
+
+    def __len__(self):
+        if self.hi is None:
+            return 1
+        else:
+            return 2
 
     def __repr__(self):
         if self.hi is not None:
