@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from pyfilament.sexpr import SExpr, eval_expr, print_expr
 from pyfilament.port import Port
+from pyfilament.event import Range
 
 
 class Command:
@@ -44,7 +45,7 @@ class Instance(Command):
 
 
 class Invoke(Command):
-    def __init__(self, variable: str, function: str, range_: tuple, ports: List[str]):
+    def __init__(self, variable: str, function: str, range_: Range, ports: List[str]):
         """
         Represent an (invoke) command.
 
@@ -66,7 +67,14 @@ class Invoke(Command):
         # print(sexpr)
         name = sexpr[0]
         function = sexpr[1][0]
-        range_ = sexpr[1][1]
+        if len(sexpr[1][1]) == 1:
+            range_ = Range(sexpr[1][1][0])
+        elif len(sexpr[1][1]) == 3:
+            range_ = Range(sexpr[1][1])
+        elif len(sexpr[1][1]) == 2:
+            range_ = Range(sexpr[1][1][0], sexpr[1][1][1])
+        else:
+            raise RuntimeError(f"Incorrect number of arguments to range: {sexpr[1]}")
         ports = sexpr[1][2:]
         return Invoke(name, function, range_, ports)
 
@@ -75,15 +83,10 @@ class Invoke(Command):
 
     def __repr__(self):
         ports_str = ", ".join(self.ports)
-        if len(self.range_) == 2:
-            range_str = f"{print_expr(self.range_[0])}, {print_expr(self.range_[1])}"
-        else:
-            range_str = f"{print_expr(self.range_)}"
-        # range_str = eval_expr(range_str)
         if not self.lower:
-            return f"{self.variable} := invoke {self.function}<{range_str}>({ports_str});"
+            return f"{self.variable} := invoke {self.function}<{self.range_}>({ports_str});"
         else:
-            return f"{self.variable} := invoke {self.function}<{range_str}>;"
+            return f"{self.variable} := invoke {self.function}<{self.range_}>;"
 
 class Connect(Command):
     def __init__(self, dest: str, src: str, guard: Optional[str] = None):
