@@ -12,18 +12,11 @@ class Direction(Enum):
 
 
 class Port:
-    def __init__(self, name: str, direction: Direction, range_: tuple, width: int):
+    def __init__(self, name: str, direction: Direction, range_: Range, width: int):
         self.name = name
         self.direction = direction
-        # self.range_ = range_
+        self.range_ = range_
         self.width = width
-
-        if len(range_) == 1:
-            self.range_ = (range_[0], range_[0])
-        elif len(range_) == 2:
-            self.range_ = (range_[0], range_[1])
-        else:
-            raise RuntimeError("Range expected only one or two expressions")
 
     @staticmethod
     def from_sexpr(sexpr: SExpr):
@@ -43,7 +36,7 @@ class Port:
 
         if len(sexpr[1]) == 1:
             range_ = Range(sexpr[1][0])
-        elif len(sexpr[1] == 2):
+        elif len(sexpr[1]) == 2:
             range_ = Range(sexpr[1][0], sexpr[1][1])
         else:
             raise RuntimeError(f"Incorrect number of arguments to range: {sexpr[1]}")
@@ -55,15 +48,11 @@ class Port:
 
 
     def __repr__(self):
-        if len(self.range_) == 2:
-            range_str = f"{print_expr(self.range_[0])}, {print_expr(self.range_[1])}"
-        else:
-            range_str = f"{print_expr(self.range_)}"
-        return f"@[{range_str}] {self.name}: {self.width}"
+        return f"@[{self.range_}] {self.name}: {self.width}"
 
 
 class InterfacePort(Port):
-    def __init__(self, name: str, event: tuple, width: int):
+    def __init__(self, name: str, event: Range, width: int):
         """
         Represent an interface port with an event.
 
@@ -76,4 +65,4 @@ class InterfacePort(Port):
         self.event = event
 
     def __repr__(self):
-        return f"@interface[{self.event[0]}] {self.name}: {self.width}"
+        return f"@interface[{self.event}] {self.name}: {self.width}"

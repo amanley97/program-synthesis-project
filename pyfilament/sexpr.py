@@ -15,7 +15,7 @@ class SExpr:
         if len(self) == 1:
             return f"{self[0]}"
         else:
-            return f"{'(' + self[1].arithmetic() + ')' if isinstance(self[1], SExpr) else self[1]} {self[0]} {'(' + self[2].arithmetic() + ')' if isinstance(self[2], SExpr) else self[2]}"
+            return f"{'(' + self[1].arithmetic() + ')' if isinstance(self[1], SExpr) else self[1]}{self[0]}{'(' + self[2].arithmetic() + ')' if isinstance(self[2], SExpr) else self[2]}"
 
     def __getitem__(self, key):
         if isinstance(key, int) or isinstance(key, slice):
