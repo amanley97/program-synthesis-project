@@ -64,17 +64,16 @@ class Invoke(Command):
 
     @staticmethod
     def from_sexpr(sexpr: SExpr):
-        # print(sexpr)
         name = sexpr[0]
         function = sexpr[1][0]
         if len(sexpr[1][1]) == 1:
-            range_ = Range(sexpr[1][1][0])
+            range_ = Range((sexpr[1][1][0]))
         elif len(sexpr[1][1]) == 3:
-            range_ = Range(sexpr[1][1])
+            range_ = Range(SExpr(sexpr[1][1]))
         elif len(sexpr[1][1]) == 2:
             range_ = Range(sexpr[1][1][0], sexpr[1][1][1])
         else:
-            raise RuntimeError(f"Incorrect number of arguments to range: {sexpr[1]}")
+            raise RuntimeError(f"Incorrect number of arguments to range: {sexpr[1][1]}")
         ports = sexpr[1][2:]
         return Invoke(name, function, range_, ports)
 

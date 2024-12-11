@@ -56,9 +56,9 @@ class FSMgen:
 
             self.ctx.commands[index + 1:index + 1] = [
                 Connect(dest=f"{cmd.variable}.write_en", 
-                        src=self.fsm.port(self.eval_event(cmd.range_.lo))),
+                        src=self.fsm.port(cmd.range_.lo.eval_event())),
                 Connect(dest=f"{cmd.variable}.in", 
-                        src=self.fsm.port(self.eval_event(cmd.range_.lo)), 
+                        src=self.fsm.port(cmd.range_.lo.eval_event()), 
                         guard=cmd.ports[0])
             ]
             cmd.flag_lower()
@@ -71,10 +71,10 @@ class FSMgen:
 
             self.ctx.commands[index + 1:index + 1] = [
                 Connect(dest=f"{cmd.variable}.left", 
-                        src=self.fsm.port(self.eval_event(cmd.range_.lo)),
+                        src=self.fsm.port(cmd.range_.lo.eval_event()),
                         guard=cmd.ports[0]),
                 Connect(dest=f"{cmd.variable}.right", 
-                        src=self.fsm.port(self.eval_event(cmd.range_.lo)), 
+                        src=self.fsm.port(cmd.range_.lo.eval_event()), 
                         guard=cmd.ports[1])
             ]
             cmd.flag_lower()

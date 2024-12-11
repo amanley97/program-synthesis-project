@@ -4,6 +4,7 @@ from pyfilament.command import Instance, Invoke, Connect
 from pyfilament.component import Component
 from pyfilament.signature import Signature
 from pyfilament.port import Port, InterfacePort
+from pyfilament.event import Event
 from pyfilament.sexpr import can_eval, eval_expr
 
 
@@ -24,9 +25,9 @@ def solve_component_constraints(component: Component):
 
     # use ports from signature
     for port in component.signature.in_ports:
-        start_times[port.name] = eval_expr(port.range_[0])
+        start_times[port.name] = eval_expr(port.range_.lo.expr)
     for port in component.signature.out_ports:
-        start_times[port.name] = eval_expr(port.range_[0])
+        start_times[port.name] = eval_expr(port.range_.lo.expr)
 
     # Define FSM states and add state constraints
     # here event is a list of event definitions as SExprs
@@ -45,19 +46,17 @@ def solve_component_constraints(component: Component):
         elif isinstance(cmd, Invoke):
             # Add timing constraints based on range
             if len(cmd.range_) == 1:
-                solver.add(start_times[cmd.variable] == range_to_cycle(cmd.range_[0]))
+                solver.add(start_times[cmd.variable] == Event.eval_event(cmd.range_.lo.expr))
             elif len(cmd.range_) == 2:
-                solver.add(start_times[cmd.variable] >= range_to_cycle(cmd.range_[0]))
-                solver.add(start_times[cmd.variable] <= range_to_cycle(cmd.range_[1]))
+                solver.add(start_times[cmd.variable] >= Event.eval_event(cmd.range_.lo.expr))
+                solver.add(start_times[cmd.variable] <= Event.eval_event(cmd.range_.hi.expr))
             elif len(cmd.range_) == 3:
                 solver.add(start_times[cmd.variable] == 3)
             else:
                 raise RuntimeError(
                     f"Too many timing constraints in invocation - {cmd}: {cmd.range_}"
                 )
-            # range_start, range_end = map(range_to_cycle, cmd.range_)
-            # solver.add(start_times[cmd.variable] >= range_start)
-            # solver.add(start_times[cmd.variable] <= range_end)
+
 
         elif isinstance(cmd, Connect):
             # Ensure connection happens only after the source produces its output
@@ -96,15 +95,3 @@ def solve_component_constraints(component: Component):
     else:
         # print(solver.assertions())
         return None
-
-
-def range_to_cycle(range_expr):
-    """
-    Convert a range expression (e.g., 'G', 'G+1') to a cycle number.
-    """
-    # Map ranges to cycle numbers for simplicity
-    if len(range_expr) == 1:
-        return 0
-    return range_expr[2]
-    mapping = {"G": 0, "G+1": 1, "G+2": 2, "G+3": 3}
-    return mapping.get(range_expr, -1)

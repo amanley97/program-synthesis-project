@@ -21,11 +21,21 @@ class Range:
             return f"{self.lo}, {self.hi}"
         else:
             return f"{self.lo}"
-
+        
 
 class Event:
     def __init__(self, expr: str | SExpr):
         self.expr = expr
 
+    def eval_event(self) -> int:
+        try:
+            G=0
+            return eval(self.convert())
+        except NameError:
+            raise ValueError(f"Invalid expression: {self.expr}")
+
+    def convert(self):
+        return self.expr.arithmetic() if isinstance(self.expr, SExpr) else self.expr
+    
     def __repr__(self):
-        return f"{self.expr.arithmetic() if isinstance(self.expr, SExpr) else self.expr}"
+        return f"{self.convert()}"
