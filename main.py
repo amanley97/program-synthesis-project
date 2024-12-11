@@ -14,7 +14,7 @@ if __name__ == '__main__':
     print(f"Component Object Form: \n-----\n{comp}\n")
 
     constraints = pyf.solve_component_constraints(comp)
-    # print(constraints)
+    print(f"Z3-Solver Constraints: \n-----\n{constraints}\n")
 
     lower_fil = pyf.generate_lower(comp)
     print(f"Lower Filament Form: \n-----\n{lower_fil}\n")

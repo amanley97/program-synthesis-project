@@ -2,6 +2,8 @@ from pyfilament.command import Invoke, Instance, Connect
 from pyfilament.component import Component, Signature
 from pyfilament.port import Port, InterfacePort
 from pyfilament.fsm import Fsm
+from pyfilament.sexpr import eval_expr, SExpr
+
 
 def generate_lower(component: Component):
     """
@@ -26,13 +28,17 @@ class FSMgen:
     def new(self) -> Fsm:
         return Fsm(comp=self.ctx, states=self.states)
     
-    def eval_event(self, event:str):
-        if isinstance(event, str):
-            G = 0  # Assign the base value for G (e.g., G = 0)
-            try:
-                return eval(event)  # Evaluate the symbolic expression
-            except NameError:
-                raise ValueError(f"Invalid symbolic expression: {event}")
+    def eval_event(self, event:SExpr):
+        try:
+            if len(event) == 1:
+                ans = 0
+            elif len(event) == 2:
+                return self.eval_event(event[0])
+            else:
+                ans = event[2]
+            return ans
+        except NameError:
+            raise ValueError(f"Invalid expression: {event}")
 
     def determine_states(self, ports:list[Port]) -> int:
         unique_events = set()
@@ -47,32 +53,34 @@ class FSMgen:
         concrete_events = {self.eval_event(event) for event in unique_events}
         return len(concrete_events)
 
-    def connect_register(self, reg_name, cmd):
+    def connect_register(self, reg_name, cmd:Invoke):
         if reg_name == cmd.function:
             # Find the index of the Invoke command to insert after it
             index = self.ctx.commands.index(cmd)
             # Append the Connect commands immediately after the Invoke command
             self.ctx.commands[index + 1:index + 1] = [
                 Connect(dest=f"{cmd.variable}.write_en", 
-                        src=self.fsm.port(self.eval_event(cmd.range_[0]))),
+                        src=self.fsm.port(self.eval_event(cmd.range_))),
                 Connect(dest=f"{cmd.variable}.in", 
-                        src=self.fsm.port(self.eval_event(cmd.range_[0])), 
+                        src=self.fsm.port(self.eval_event(cmd.range_)), 
                         guard=cmd.ports[0])
             ]
+            cmd.flag_lower()
 
-    def connect_comp(self, obj_name, cmd):
+    def connect_comp(self, obj_name, cmd:Invoke):
         if obj_name == cmd.function:
             # Find the index of the Invoke command to insert after it
             index = self.ctx.commands.index(cmd)
             # Append the Connect commands immediately after the Invoke command
             self.ctx.commands[index + 1:index + 1] = [
                 Connect(dest=f"{cmd.variable}.left", 
-                        src=self.fsm.port(self.eval_event(cmd.range_[0])),
+                        src=self.fsm.port(self.eval_event(cmd.range_)),
                         guard=cmd.ports[0]),
                 Connect(dest=f"{cmd.variable}.right", 
-                        src=self.fsm.port(self.eval_event(cmd.range_[0])), 
+                        src=self.fsm.port(self.eval_event(cmd.range_)), 
                         guard=cmd.ports[1])
             ]
+            cmd.flag_lower()
 
     def connect_fsm_ports(self):
         # Fetch invoke commands

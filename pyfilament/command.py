@@ -2,7 +2,6 @@ from typing import List, Optional
 
 from pyfilament.sexpr import SExpr, eval_expr, print_expr
 from pyfilament.port import Port
-# from component import Signature
 
 
 class Command:
@@ -60,6 +59,7 @@ class Invoke(Command):
         self.function = function
         self.range_ = range_
         self.ports = ports
+        self.lower = False
 
     @staticmethod
     def from_sexpr(sexpr: SExpr):
@@ -70,6 +70,9 @@ class Invoke(Command):
         ports = sexpr[1][2:]
         return Invoke(name, function, range_, ports)
 
+    def flag_lower(self):
+        self.lower = True
+
     def __repr__(self):
         ports_str = ", ".join(self.ports)
         if len(self.range_) == 2:
@@ -77,8 +80,10 @@ class Invoke(Command):
         else:
             range_str = f"{print_expr(self.range_)}"
         # range_str = eval_expr(range_str)
-        return f"{self.variable} := invoke {self.function}<{range_str}>({ports_str});"
-
+        if not self.lower:
+            return f"{self.variable} := invoke {self.function}<{range_str}>({ports_str});"
+        else:
+            return f"{self.variable} := invoke {self.function}<{range_str}>;"
 
 class Connect(Command):
     def __init__(self, dest: str, src: str, guard: Optional[str] = None):

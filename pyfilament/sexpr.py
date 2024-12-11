@@ -65,7 +65,7 @@ def print_expr(expr: SExpr):
     if len(expr) == 1:
         return expr[0]
     elif len(expr) == 3:
-        return f"{expr[1]} {expr[0]} {expr[2]}"
+        return f"{expr[1]}{expr[0]}{expr[2]}"
 
 
 def eval_expr(expr: SExpr | str):

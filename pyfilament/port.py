@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, List
 
-from pyfilament.sexpr import SExpr
+from pyfilament.sexpr import SExpr, print_expr
 
 class Direction(Enum):
     IN = 0
@@ -44,7 +44,10 @@ class Port:
         return Port(name, direction, range_, width)
 
     def __repr__(self):
-        range_str = f"{self.range_[0]}, {self.range_[1]}"
+        if len(self.range_) == 2:
+            range_str = f"{print_expr(self.range_[0])}, {print_expr(self.range_[1])}"
+        else:
+            range_str = f"{print_expr(self.range_)}"
         return f"@[{range_str}] {self.name}: {self.width}"
 
 class InterfacePort(Port):
