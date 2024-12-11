@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional, List
 
 from pyfilament.sexpr import SExpr, print_expr
+from pyfilament.event import Range, Event
 
 
 class Direction(Enum):
@@ -39,11 +40,19 @@ class Port:
         if start == -1 or stop == -1:
             raise RuntimeError(f"No width specified for port: {sexpr}")
         width = int(sexpr[0][start + 1 : stop])
-        range_ = sexpr[1]
+
+        if len(sexpr[1]) == 1:
+            range_ = Range(sexpr[1][0])
+        elif len(sexpr[1] == 2):
+            range_ = Range(sexpr[1][0], sexpr[1][1])
+        else:
+            raise RuntimeError(f"Incorrect number of arguments to range: {sexpr[1]}")
+
         name = sexpr[2]
         if direction == Direction.INTERFACE:
             return InterfacePort(name, range_, width)
         return Port(name, direction, range_, width)
+
 
     def __repr__(self):
         if len(self.range_) == 2:
