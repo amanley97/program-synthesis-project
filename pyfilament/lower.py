@@ -5,18 +5,20 @@ from pyfilament.fsm import Fsm
 from pyfilament.sexpr import eval_expr, SExpr
 
 
+
 def generate_lower(component: Component):
     """
-        Entry point to transform a component into lower filament.
+    Entry point to transform a component into lower filament.
 
-        Args:
-            component (Component): Component to be transformed.
-        """
+    Args:
+        component (Component): Component to be transformed.
+    """
     lower_fil = FSMgen.generate(component)
     return lower_fil
 
+
 class FSMgen:
-    def __init__(self, ctx:Component):
+    def __init__(self, ctx: Component):
         """
         Initialize the FSM generator with FSM details and context.
         """
@@ -27,7 +29,7 @@ class FSMgen:
 
     def new(self) -> Fsm:
         return Fsm(comp=self.ctx, states=self.states)
-    
+
     def eval_event(self, event:SExpr):
         try:
             if len(event) == 1:
@@ -40,7 +42,7 @@ class FSMgen:
         except NameError:
             raise ValueError(f"Invalid expression: {event}")
 
-    def determine_states(self, ports:list[Port]) -> int:
+    def determine_states(self, ports: list[Port]) -> int:
         unique_events = set()
 
         for port in ports:
@@ -58,6 +60,7 @@ class FSMgen:
             # Find the index of the Invoke command to insert after it
             index = self.ctx.commands.index(cmd)
             # Append the Connect commands immediately after the Invoke command
+
             self.ctx.commands[index + 1:index + 1] = [
                 Connect(dest=f"{cmd.variable}.write_en", 
                         src=self.fsm.port(self.eval_event(cmd.range_))),
@@ -72,6 +75,7 @@ class FSMgen:
             # Find the index of the Invoke command to insert after it
             index = self.ctx.commands.index(cmd)
             # Append the Connect commands immediately after the Invoke command
+
             self.ctx.commands[index + 1:index + 1] = [
                 Connect(dest=f"{cmd.variable}.left", 
                         src=self.fsm.port(self.eval_event(cmd.range_)),
@@ -85,8 +89,16 @@ class FSMgen:
     def connect_fsm_ports(self):
         # Fetch invoke commands
         invokes = [cmd for cmd in self.ctx.commands if isinstance(cmd, Invoke)]
-        registers = [cmd.variable for cmd in self.ctx.commands if isinstance(cmd, Instance) and cmd.type_name == "Register"]
-        objects = [cmd.variable for cmd in self.ctx.commands if isinstance(cmd, Instance) and cmd.type_name != "Register"]
+        registers = [
+            cmd.variable
+            for cmd in self.ctx.commands
+            if isinstance(cmd, Instance) and cmd.type_name == "Register"
+        ]
+        objects = [
+            cmd.variable
+            for cmd in self.ctx.commands
+            if isinstance(cmd, Instance) and cmd.type_name != "Register"
+        ]
 
         for reg_name in registers:
             for cmd in invokes:

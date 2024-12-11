@@ -1,7 +1,8 @@
 from pyfilament.component import Component
 
+
 class Fsm:
-    def __init__(self, comp:Component, states:int):
+    def __init__(self, comp: Component, states: int):
         """
         Initialize the FSM with a name, states, and a trigger.
         """
@@ -9,7 +10,6 @@ class Fsm:
         self.states = states
         self.trigger = comp.signature.interface
         self.name = f"{self.trigger.event[0]}_fsm"
-
 
     def __repr__(self):
         return f"fsm {self.name}[{self.states}]({self.trigger.name})"

@@ -44,5 +44,7 @@ class Signature:
         out_ports_str = ", ".join(repr(p) for p in self.out_ports)
         for e in self.event:
             e = str(e)
-            event_str = e.strip('()').split()[1] if e.strip('()').startswith('event') else None
+            event_str = (
+                e.strip("()").split()[1] if e.strip("()").startswith("event") else None
+            )
         return f"{self.name}<{event_str}>({self.interface}, {in_ports_str}) -> ({out_ports_str})"
