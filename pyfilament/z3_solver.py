@@ -3,6 +3,7 @@ from z3 import sat, Int, Solver, Or, And, Implies
 from pyfilament.command import Instance, Invoke, Connect
 from pyfilament.component import Component
 
+
 def solve_component_constraints(component: Component):
     """
     Argsuments- component: A Component instance containing its signature and commands.
@@ -51,7 +52,6 @@ def solve_component_constraints(component: Component):
                 raise RuntimeError(
                     f"Too many timing constraints in invocation - {cmd}: {cmd.range_}"
                 )
-
 
         elif isinstance(cmd, Connect):
             # Ensure connection happens only after the source produces its output

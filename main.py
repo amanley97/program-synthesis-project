@@ -5,7 +5,7 @@ import pyfilament as pyf
 argv = ArgumentParser()
 argv.add_argument("filename")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = argv.parse_args()
     expr = pyf.parse_file(args.filename)[0]
     print(f"S-Expression Form: \n-----\n{expr}\n")

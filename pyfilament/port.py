@@ -45,7 +45,6 @@ class Port:
             return InterfacePort(name, range_, width)
         return Port(name, direction, range_, width)
 
-
     def __repr__(self):
         return f"@[{self.range_}] {self.name}: {self.width}"
 

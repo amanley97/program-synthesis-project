@@ -29,9 +29,9 @@ class FSMgen:
     def new(self) -> Fsm:
         return Fsm(comp=self.ctx, states=self.states)
 
-    def eval_event(self, event:Event):
+    def eval_event(self, event: Event):
         try:
-            G=0
+            G = 0
             return eval(repr(event))
         except NameError:
             raise ValueError(f"Invalid expression: {event}")
@@ -48,34 +48,42 @@ class FSMgen:
         concrete_events = {repr(event) for event in unique_events}
         return len(concrete_events)
 
-    def connect_register(self, reg_name, cmd:Invoke):
+    def connect_register(self, reg_name, cmd: Invoke):
         if reg_name == cmd.function:
             # Find the index of the Invoke command to insert after it
             index = self.ctx.commands.index(cmd)
             # Append the Connect commands immediately after the Invoke command
 
-            self.ctx.commands[index + 1:index + 1] = [
-                Connect(dest=f"{cmd.variable}.write_en", 
-                        src=self.fsm.port(cmd.range_.lo.eval_event())),
-                Connect(dest=f"{cmd.variable}.in", 
-                        src=self.fsm.port(cmd.range_.lo.eval_event()), 
-                        guard=cmd.ports[0])
+            self.ctx.commands[index + 1 : index + 1] = [
+                Connect(
+                    dest=f"{cmd.variable}.write_en",
+                    src=self.fsm.port(cmd.range_.lo.eval_event()),
+                ),
+                Connect(
+                    dest=f"{cmd.variable}.in",
+                    src=self.fsm.port(cmd.range_.lo.eval_event()),
+                    guard=cmd.ports[0],
+                ),
             ]
             cmd.flag_lower()
 
-    def connect_comp(self, obj_name, cmd:Invoke):
+    def connect_comp(self, obj_name, cmd: Invoke):
         if obj_name == cmd.function:
             # Find the index of the Invoke command to insert after it
             index = self.ctx.commands.index(cmd)
             # Append the Connect commands immediately after the Invoke command
 
-            self.ctx.commands[index + 1:index + 1] = [
-                Connect(dest=f"{cmd.variable}.left", 
-                        src=self.fsm.port(cmd.range_.lo.eval_event()),
-                        guard=cmd.ports[0]),
-                Connect(dest=f"{cmd.variable}.right", 
-                        src=self.fsm.port(cmd.range_.lo.eval_event()), 
-                        guard=cmd.ports[1])
+            self.ctx.commands[index + 1 : index + 1] = [
+                Connect(
+                    dest=f"{cmd.variable}.left",
+                    src=self.fsm.port(cmd.range_.lo.eval_event()),
+                    guard=cmd.ports[0],
+                ),
+                Connect(
+                    dest=f"{cmd.variable}.right",
+                    src=self.fsm.port(cmd.range_.lo.eval_event()),
+                    guard=cmd.ports[1],
+                ),
             ]
             cmd.flag_lower()
 

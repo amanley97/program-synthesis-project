@@ -86,6 +86,7 @@ class Invoke(Command):
         else:
             return f"{self.variable} := invoke {self.function}<{self.range_}>;"
 
+
 class Connect(Command):
     def __init__(self, dest: str, src: str, guard: Optional[str] = None):
         """
