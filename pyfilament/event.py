@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pyfilament.sexpr import SExpr
+from pyfilament.sexpr import SExpr, can_eval, eval_expr
 
 class Range:
     def __init__(self, lo: str | SExpr, hi: Optional[str | SExpr]=None):
@@ -28,11 +28,7 @@ class Event:
         self.expr = expr
 
     def eval_event(self) -> int:
-        try:
-            G=0
-            return eval(self.convert())
-        except NameError:
-            raise ValueError(f"Invalid expression: {self.expr}")
+        return eval_expr(self.expr)
 
     def convert(self):
         return self.expr.arithmetic() if isinstance(self.expr, SExpr) else self.expr

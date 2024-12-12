@@ -46,10 +46,10 @@ def solve_component_constraints(component: Component):
         elif isinstance(cmd, Invoke):
             # Add timing constraints based on range
             if len(cmd.range_) == 1:
-                solver.add(start_times[cmd.variable] == Event.eval_event(cmd.range_.lo.expr))
+                solver.add(start_times[cmd.variable] == cmd.range_.lo.eval_event())
             elif len(cmd.range_) == 2:
-                solver.add(start_times[cmd.variable] >= Event.eval_event(cmd.range_.lo.expr))
-                solver.add(start_times[cmd.variable] <= Event.eval_event(cmd.range_.hi.expr))
+                solver.add(start_times[cmd.variable] >= cmd.range_.lo.eval_event())
+                solver.add(start_times[cmd.variable] <= cmd.range_.hi.eval_event())
             elif len(cmd.range_) == 3:
                 solver.add(start_times[cmd.variable] == 3)
             else:
