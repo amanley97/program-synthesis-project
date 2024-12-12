@@ -1,0 +1,68 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{graphicx} % Required for inserting images
+
+% charter font
+\usepackage[bitstream-charter]{mathdesign}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+
+\usepackage{amsmath}
+\usepackage[
+backend=biber,
+sorting=none
+]{biblatex}
+\emergencystretch=1em
+
+\usepackage[hidelinks]{hyperref}
+
+\addbibresource{bibliography.bib}
+
+\title{Pyfilament: an Implementation of Filament in Python}
+\author{Carolina Castellanos, Alex Manley, and Harlan Williams\\\{cmedina, amanley97, hrw\}@ku.edu}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+% about HDL, about timing/pipelining, what filament does, why it's useful and what its advantages are, the filament language spec
+
+Application-specific hardware accelerators implemented on FPGAs can significantly improve computational efficiency and performance in domains like image processing \cite{hegarty2014darkroom} and natural language processing \cite{khan21}. However, designing accelerators using traditional hardware description languages (HDLs) is complex and error-prone, and while FPGAs are becoming more affordable, this difficulty in design remains a bottleneck in their widespread use.
+
+As a solution to this problem, there is much ongoing research into languages specifically targeting the design of accelerators, dubbed \emph{accelerator design languages} (ADLs). While HDLs such as Verilog target arbitrary circuit design, ADLs reduce complexity and provide useful abstractions for the designer by targeting specifically the design space of hardware accelerators \cite{sampson2021adl}. These languages add high-level abstractions such as types suitable to the problem domain of accelerators, but compile down to more ordinary HDLs to make use of pre-existing tools for producing hardware.
+
+One such example of an ADL is Filament, introduced by Nigam et al.~\cite{nigam2023filament}, which explicitly incorporates timing and pipelining constraints. The concept of timeline types is in its core, which describe the availability and requirements of signals across clock cycles. As these constraints are embedded directly into the language, Filament proposes a safe and modular composition of hardware components. It ensures that hardware designs adhere to strict timing guarantees while facilitating the reuse of components in larger systems. This approach makes Filament particularly advantageous for building high-performance pipelines where misaligned signals or structural mismatches can result in inefficiencies or errors.
+
+Our project aims to simplify and reimplement Filament’s design principles in Python. While the original Filament implementation emphasized advanced type systems and integration into high-level workflows, our reimplementation focuses on accessibility and simplicity. Specifically, we developed a tool-chain that parses high-level hardware descriptions from S-expressions, enforces timing and structural constraints through a simplified type-checking mechanism, and generates lower Filament code. While we initially planned to generate Calyx \cite{nigam2021calyx} Intermediate Representation (IR), our project achieved functionality up to generating valid lower-level Filament code, effectively demonstrating the feasibility of our simplified reimplementation. This report explores the motivations, methodology, and results of our project. 
+
+\section{Background}
+
+\section{Example}
+% walk through of the two examples from the proposal, why our implementation
+
+\section{Design}
+% organization of our code
+Pyfilament is implemented as a single-pass compiler from an s-expression language to lower Filament IR.
+
+\subsection{Parser}
+% Harlan's part
+
+\subsection{Solver}
+% Carolina's part
+
+\subsection{Compiler to lower filament}
+% Alex's part
+
+\section{Evaluation}
+% evaluation on some filament benchmarks, performance
+
+\section{Conclusion}
+% how the project went
+
+
+
+\medskip
+
+\printbibliography
+\end{document}
