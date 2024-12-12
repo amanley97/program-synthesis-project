@@ -2,11 +2,6 @@ from z3 import sat, Int, Solver, Or, And, Implies
 
 from pyfilament.command import Instance, Invoke, Connect
 from pyfilament.component import Component
-from pyfilament.signature import Signature
-from pyfilament.port import Port, InterfacePort
-from pyfilament.event import Event
-from pyfilament.sexpr import can_eval, eval_expr
-
 
 def solve_component_constraints(component: Component):
     """
@@ -25,9 +20,9 @@ def solve_component_constraints(component: Component):
 
     # use ports from signature
     for port in component.signature.in_ports:
-        start_times[port.name] = eval_expr(port.range_.lo.expr)
+        start_times[port.name] = port.range_.lo.eval_constraint()
     for port in component.signature.out_ports:
-        start_times[port.name] = eval_expr(port.range_.lo.expr)
+        start_times[port.name] = port.range_.lo.eval_constraint()
 
     # Define FSM states and add state constraints
     # here event is a list of event definitions as SExprs
@@ -46,10 +41,10 @@ def solve_component_constraints(component: Component):
         elif isinstance(cmd, Invoke):
             # Add timing constraints based on range
             if len(cmd.range_) == 1:
-                solver.add(start_times[cmd.variable] == cmd.range_.lo.eval_event())
+                solver.add(start_times[cmd.variable] == cmd.range_.lo.eval_constraint())
             elif len(cmd.range_) == 2:
-                solver.add(start_times[cmd.variable] >= cmd.range_.lo.eval_event())
-                solver.add(start_times[cmd.variable] <= cmd.range_.hi.eval_event())
+                solver.add(start_times[cmd.variable] >= cmd.range_.lo.eval_constraint())
+                solver.add(start_times[cmd.variable] <= cmd.range_.hi.eval_constraint())
             elif len(cmd.range_) == 3:
                 solver.add(start_times[cmd.variable] == 3)
             else:

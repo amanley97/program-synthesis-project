@@ -2,7 +2,6 @@ from typing import List
 
 from pyfilament.signature import Signature
 from pyfilament.command import Command, Instance, Invoke, Connect
-from pyfilament.port import Port, InterfacePort
 from pyfilament.sexpr import SExpr
 
 

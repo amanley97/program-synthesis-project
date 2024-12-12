@@ -2,7 +2,7 @@ from pyfilament.command import Invoke, Instance, Connect
 from pyfilament.component import Component
 from pyfilament.port import Port
 from pyfilament.fsm import Fsm
-from pyfilament.event import Event, Range
+from pyfilament.event import Event
 
 
 def generate_lower(component: Component):

@@ -1,8 +1,7 @@
 from enum import Enum
-from typing import Optional, List
 
-from pyfilament.sexpr import SExpr, print_expr
-from pyfilament.event import Range, Event
+from pyfilament.sexpr import SExpr
+from pyfilament.event import Range
 
 
 class Direction(Enum):

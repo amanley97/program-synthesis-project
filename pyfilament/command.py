@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from pyfilament.sexpr import SExpr, eval_expr, print_expr
-from pyfilament.port import Port
+from pyfilament.sexpr import SExpr
 from pyfilament.event import Range
 
 

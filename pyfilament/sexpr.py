@@ -1,4 +1,4 @@
-from z3 import Int, ArithRef
+from z3 import Int
 
 
 class SExpr:
