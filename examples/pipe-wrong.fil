@@ -1,0 +1,20 @@
+(comp main
+  (events
+    (event G))
+  (ports
+    (interface[1] (G) go)
+    (in-port[1] (G (+ G 3)) op)
+    (in-port[32] (G (+ G 1)) left)
+    (in-port[32] (G (+ G 1)) right)
+    (out-port[32] ((+ G 2) (+ G 3)) out))
+  (instantiate
+    (A (new Add[32]))
+    (M (new Mult[32]))
+    (r0 (new Register[32]))
+    (mx (new Mux[32])))
+  (invoke
+    (m0 (M (G) left right))
+    (a0 (A (G) left right))
+    (add (r0 (G (+ G 3)) a0.out))
+    (mux (mx (+ G 2) op, r0.out, m0.out)))
+  (connect (out mux.out)))
