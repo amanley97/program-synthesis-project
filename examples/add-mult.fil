@@ -13,4 +13,4 @@
    (mult (M ((+ G 1) (+ G 3)) add.out add.out)))
   (connect (out mult.out)))
 
-# (a + b) * (a + b)
+; (a + b) * (a + b)
