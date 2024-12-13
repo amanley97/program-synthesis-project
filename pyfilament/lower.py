@@ -1,6 +1,6 @@
 from pyfilament.command import Invoke, Instance, Connect
 from pyfilament.component import Component
-from pyfilament.port import Port
+from pyfilament.port import Port, Direction
 from pyfilament.fsm import Fsm
 from pyfilament.event import Event
 
@@ -40,8 +40,11 @@ class FSMgen:
         unique_events = set()
 
         for port in ports:
-            unique_events.add(port.range_.lo)
-            unique_events.add(port.range_.hi)
+            if port.direction == Direction.IN:
+                unique_events.add(port.range_.lo)
+                unique_events.add(port.range_.hi)
+            else:
+                unique_events.add(port.range_.lo)
 
         # Evaluate unique symbolic expressions like G and G+1
         # Convert them into concrete indices if needed.

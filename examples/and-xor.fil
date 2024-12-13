@@ -6,7 +6,7 @@
    (in-port[32]  (G       (+ G 1)) left)
    (in-port[32]  (G       (+ G 1)) right)
    (in-port[32]  ((+ G 1) (+ G 2)) opt)
-   (out-port[32] ((+ G 2) (+ G 3)) out))
+   (out-port[32] ((+ G 3) (+ G 4)) out))
   (instantiate
    (A (new And[32]))
    (X (new Xor[32]))
