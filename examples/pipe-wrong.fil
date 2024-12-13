@@ -1,6 +1,5 @@
 (comp main
-  (events
-    (event G))
+  (events (event G))
   (ports
     (interface[1] (G) go)
     (in-port[1] (G (+ G 3)) op)
@@ -16,5 +15,5 @@
     (m0 (M (G) left right))
     (a0 (A (G) left right))
     (add (r0 (G (+ G 3)) a0.out))
-    (mux (mx (+ G 2) op, r0.out, m0.out)))
+    (mux (mx (+ G 2) op, add.out, m0.out))) ; attempt to use add.out before it's ready
   (connect (out mux.out)))
