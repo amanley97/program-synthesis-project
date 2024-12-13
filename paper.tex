@@ -30,29 +30,56 @@ sorting=none
 
 Application-specific hardware accelerators implemented on FPGAs can significantly improve computational efficiency and performance in domains like image processing \cite{hegarty2014darkroom} and natural language processing \cite{khan21}. However, designing accelerators using traditional hardware description languages (HDLs) is complex and error-prone, and while FPGAs are becoming more affordable, this difficulty in design remains a bottleneck in their widespread use.
 
-As a solution to this problem, there is much ongoing research into languages specifically targeting the design of accelerators, dubbed \emph{accelerator design languages} (ADLs). While HDLs such as Verilog target arbitrary circuit design, ADLs reduce complexity and provide useful abstractions for the designer by targeting specifically the design space of hardware accelerators \cite{sampson2021adl}. These languages add high-level abstractions such as types suitable to the problem domain of accelerators, but compile down to more ordinary HDLs to make use of pre-existing tools for producing hardware.
+As a solution to this problem, there is much ongoing research into languages specifically targeting the design of accelerators, dubbed \emph{accelerator design languages} (ADLs). Unlike traditional HDLs, ADLs prioritize ease of use and modularity, incorporating features like type systems, pipeline modeling, and resource-aware optimizations. While HDLs such as Verilog target arbitrary circuit design, ADLs reduce complexity and provide useful abstractions for the designer by targeting specifically the design space of hardware accelerators \cite{sampson2021adl}.
 
 One such example of an ADL is Filament, introduced by Nigam et al.~\cite{nigam2023filament}, which explicitly incorporates timing and pipelining constraints. The concept of timeline types is in its core, which describe the availability and requirements of signals across clock cycles. As these constraints are embedded directly into the language, Filament proposes a safe and modular composition of hardware components. It ensures that hardware designs adhere to strict timing guarantees while facilitating the reuse of components in larger systems. This approach makes Filament particularly advantageous for building high-performance pipelines where misaligned signals or structural mismatches can result in inefficiencies or errors.
 
 Our project aims to simplify and reimplement Filament’s design principles in Python. While the original Filament implementation emphasized advanced type systems and integration into high-level workflows, our reimplementation focuses on accessibility and simplicity. Specifically, we developed a tool-chain that parses high-level hardware descriptions from S-expressions, enforces timing and structural constraints through a simplified type-checking mechanism, and generates lower Filament code. While we initially planned to generate Calyx \cite{nigam2021calyx} Intermediate Representation (IR), our project achieved functionality up to generating valid lower-level Filament code, effectively demonstrating the feasibility of our simplified reimplementation. This report explores the motivations, methodology, and results of our project. 
 
-\section{Background}
-
 \section{Example}
 % walk through of the two examples from the proposal, why our implementation
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[scale=0.3]{img/example.png}
+    \caption{Example Filament Program}
+    \label{fig:ex}
+\end{figure}
 
 \section{Design}
 % organization of our code
-Pyfilament is implemented as a single-pass compiler from an s-expression language to lower Filament IR.
+Pyfilament is implemented as a single-pass compiler from an S-expression language to lower filament. Figure~\ref{fig:imp} below shows the implementation flow for our synthesizer, beginning from the input format and ending with the lower filament form. The rest of this section will detail each step of the synthesis flow.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[scale=0.4]{img/implementation.png}
+    \caption{Implementation Flowchart}
+    \label{fig:imp}
+\end{figure}
 
 \subsection{Parser}
 % Harlan's part
+The front-end of Pyfilament uses an S-expression parser to generate an abstract syntax tree (AST) representation of components which is then operated on by the solver and compiler to lower filament. We used an S-expression language to specify components in rather than a custom language or Filament parser to simplify our implementation. Another benefit of using an S-expression language is that there is minimal new syntax to learn for new users, only keywords and general structure. The choice to use S-expressions also removed the need for a step to generate an AST after tokenizing, because the language exactly mirrors the structure of the AST.
+
+The filament language makes use of instantiations, invocations, and connections as the only types of allowed statement. Instantiations create a new component, invocations use that component at a given clock cycle, and connections link together ports inside the component. In the original filament, all of these statements can be used anywhere in a component block. To simplify parsing different types of statements, in our S-expression language, all instantiations are grouped together, followed by all invocations, and all connections. Because the clock cycle at which each invocation occurs is specified in the invocation, the actual location of the statement in the body of the component is irrelevant, unlike in general purpose programming languages.
 
 \subsection{Solver}
 % Carolina's part
 
 \subsection{Compiler to lower filament}
 % Alex's part
+Once the Z3 solver determines that the program is correct and valid, we must then generate the finite-state machine (FSM) which converts the timing events to physical hardware connections and export the final program. This final program will be in a state which the original paper calls \emph{lower filament}.
+
+\subsubsection{Finite-State Machine Generation}
+To ensure that the program is correctly ordered, such that components are invoked in the cycle which they are required, Filament utilizes finite-state machines (FSM). FSM's are an important concept in hardware design, the basic idea being that the FSM has a certain number of states which control different functions in the system. To change states, a certain activation must occur, which ensures that the system operates according to predefined rules.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[scale=0.7]{img/fsm.png}
+    \caption{Example Filament FSM}
+    \label{fig:fsm}
+\end{figure}
+
+Figure~\ref{fig:fsm} illustrates an example FSM in Filament. The trigger connection is used to switch to the next state and typically is activated each hardware cycle. Each state in the FSM corresponds to the individual timing events of the design. When such an FSM is implemented in the design it ensures that each component is invoked at it's correct time and the pipeline order is maintained.
 
 \section{Evaluation}
 % evaluation on some filament benchmarks, performance
