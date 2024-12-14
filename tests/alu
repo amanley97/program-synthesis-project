@@ -1,0 +1,22 @@
+comp main<G: 3>(@interface[G] go: 1, @[G, G+3] op: 1, @[G, G+1] left: 32, @[G, G+1] right: 32) -> (@[G+2, G+3] out: 32) {
+  A := new Add[32];
+  M := new Mult_32;
+  m0 := invoke M<G>;
+  m0.go_G = G_fsm._0;
+  m0.left = G_fsm._0 ? left;
+  m0.right = G_fsm._0 ? right;
+  a0 := invoke A<G>;
+  a0.left = G_fsm._0 ? left;
+  a0.right = G_fsm._0 ? right;
+  R0 := new Register[32];
+  r0 := invoke R0<G,G+3>;
+  r0.write_en = G_fsm._0;
+  r0.in = G_fsm._0 ? a0.out;
+  MX := new Mux[32];
+  mx := invoke MX<G+2>;
+  mx.sel = G_fsm._2 ? op;
+  mx.in0 = G_fsm._2 ? r0.out;
+  mx.in1 = G_fsm._2 ? m0.out;
+  out = mx.out;
+  fsm G_fsm[3](go);
+}

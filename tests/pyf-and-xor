@@ -1,0 +1,24 @@
+comp main<G>(@interface[G] go: 1, @[G, G+1] left: 32, @[G, G+1] right: 32, @[G+1, G+2] opt: 32) -> (@[G+3, G+4] out: 32) {
+  A := new And[32];
+  X := new Xor[32];
+  ANDSTAGE := new Register[32];
+  XORSTAGE := new Register[32];
+  R0 := new Register[32];
+  a0 := invoke A<G>;
+  a0.left = G_fsm._0 ? left;
+  a0.right = G_fsm._0 ? right;
+  andstage := invoke ANDSTAGE<G, G+2>;
+  andstage.write_en = G_fsm._0;
+  andstage.in = G_fsm._0 ? a0.out;
+  x0 := invoke X<G+1>;
+  x0.left = G_fsm._1 ? andstage.out;
+  x0.right = G_fsm._1 ? opt;
+  xorstage := invoke XORSTAGE<G+1, G+3>;
+  xorstage.write_en = G_fsm._1;
+  xorstage.in = G_fsm._1 ? x0.out;
+  r0 := invoke R0<G+2, G+4>;
+  r0.write_en = G_fsm._2;
+  r0.in = G_fsm._2 ? xorstage.out;
+  out = r0.out;
+  fsm G_fsm[4](go);
+}

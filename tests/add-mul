@@ -1,0 +1,21 @@
+comp main<G>(@interface[G] go: 1, @[G, G+1] left: 32, @[G, G+1] right: 32) -> (@[G+4, G+5] out: 32) {
+  A := new Add[32];
+  M := new Mult_32;
+  a0 := invoke A<G>;
+  a0.left = G_fsm._0 ? left;
+  a0.right = G_fsm._0 ? right;
+  ADDSTAGE := new Register[32];
+  addstage := invoke ADDSTAGE<G,G+2>;
+  addstage.write_en = G_fsm._0;
+  addstage.in = G_fsm._0 ? a0.out;
+  m0 := invoke M<G+1>;
+  m0.go_G = G_fsm._1;
+  m0.left = G_fsm._1 ? addstage.out;
+  m0.right = G_fsm._1 ? addstage.out;
+  MULTSTAGE := new Register[32];
+  multstage := invoke MULTSTAGE<G+3,G+5>;
+  multstage.write_en = G_fsm._3;
+  multstage.in = G_fsm._3 ? m0.out;
+  out = multstage.out;
+  fsm G_fsm[5](go);
+}

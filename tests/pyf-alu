@@ -1,0 +1,22 @@
+comp main<G>(@interface[G] go: 1, @[G,G+3] op: 1, @[G,G+1] left: 32, @[G,G+1] right: 32) -> (@[G+2,G+3] out: 32) {
+  A := new Add[32];
+  M := new Mult[32];
+  r0 := new Register[32];
+  mx := new Mux[32];
+  mult := invoke M<G,G+1>;
+  mult.left = G_fsm._0 ? left;
+  mult.right = G_fsm._0 ? right;
+  add := invoke A<G,G+1>;
+  add.left = G_fsm._0 ? left;
+  add.right = G_fsm._0 ? right;
+  reg := invoke r0<G,G+3>;
+  reg.write_en = G_fsm._0;
+  reg.in = G_fsm._0 ? add.out;
+  mux := invoke mx<G+2,G+3>;
+  mux.left = G_fsm._2 ? op;
+  mux.right = G_fsm._2 ? reg.out;
+  out = mux.out;
+  fsm G_fsm[4](go);
+}
+
+NotImplementedError: Mux type is not implemented.
