@@ -70,6 +70,11 @@ class FSMgen:
             ]
             cmd.flag_lower()
 
+    def process_command(self, cmd):
+        if cmd.type_name == "Mux":
+            raise NotImplementedError("Mux type is not implemented.")
+        return cmd.type_name != "Register"
+
     def connect_comp(self, obj_name, cmd: Invoke):
         if obj_name == cmd.function:
             # Find the index of the Invoke command to insert after it
@@ -101,7 +106,7 @@ class FSMgen:
         objects = [
             cmd.variable
             for cmd in self.ctx.commands
-            if isinstance(cmd, Instance) and cmd.type_name != "Register"
+            if isinstance(cmd, Instance) and self.process_command(cmd)
         ]
 
         for reg_name in registers:
@@ -109,6 +114,8 @@ class FSMgen:
                 self.connect_register(reg_name, cmd)
 
         for obj_name in objects:
+            if obj_name.type_name == "Mux":
+                raise NotImplementedError(f"Only two input components and registers are supported, not {obj_name} object!")
             for cmd in invokes:
                 self.connect_comp(obj_name, cmd)
 

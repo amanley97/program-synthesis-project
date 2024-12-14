@@ -1,24 +1,19 @@
 (comp main
-  (events
-   (event G))
+  (events (event G))
   (ports
-   (interface[1] (G) go)  ; G is not phantom in this component because it has an interface
-   (in-port[32]  (G       (+ G 1)) left)
-   (in-port[32]  (G       (+ G 1)) right)
-   (in-port[32]  ((+ G 1) (+ G 2)) opt)
-   (out-port[32] ((+ G 4) (+ G 5)) out))
+   (interface[1] (G) go)
+   (in-port[1]    (G (+ G 3)) op)
+   (in-port[32]   (G (+ G 1)) left)
+   (in-port[32]   (G (+ G 1)) right)
+   (out-port[32]  ((+ G 2) (+ G 3)) out))
   (instantiate
-   (A (new And[32]))
-   (X (new Xor[32]))
-   (ANDSTAGE (new Register[32]))
-   (XORSTAGE (new Register[32]))
-   (R0 (new Register[32])))
+   (A  (new Add[32]))
+   (M  (new Mult[32]))
+   (r0 (new Register[32]))
+   (mx (new Mux[32])))
   (invoke
-   (a0 (A (G) left right))
-   (and (ANDSTAGE (G (+ G 2)) a0.out))
-   (x0 (X (+ G 1) and.out opt))
-   (xor (XORSTAGE ((+ G 1) (+ G 3)) x0.out))
-   (r0 (R0 ((+ G 2) (+ G 4)) xor.out)))
-  (connect (out r0.out))
-; (constraints (> L G)) ; optional constraints over events, if there were multiple events
-)
+   (mult (M (G (+ G 1)) left right))
+   (add  (A (G (+ G 1)) left right))
+   (reg  (r0 (G (+ G 3)) add.out))
+   (mux  (mx ((+ G 2) (+ G 3)) op reg.out mult.out)))
+  (connect (out mux.out)))

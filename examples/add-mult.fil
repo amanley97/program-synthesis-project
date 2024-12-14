@@ -1,16 +1,18 @@
 (comp main
-  (events (event G))
+  (events (event G:2))
   (ports
    (interface[1] (G) go)
    (in-port[32]  (G       (+ G 1)) left)
    (in-port[32]  (G       (+ G 1)) right)
-   (out-port[32] ((+ G 3) (+ G 4)) out))
+   (out-port[32] ((+ G 4) (+ G 5)) out))
   (instantiate
    (A (new Add[32]))
-   (M (new Mul[32])))
+   (M (new Mult[32]))
+   (ADDSTAGE (new Register[32]))
+   (MULTSTAGE (new Register[32])))
   (invoke
-   (add  (A (G (+ G 1)) left right))
-   (mult (M ((+ G 1) (+ G 3)) add.out add.out)))
-  (connect (out mult.out)))
-
-; (a + b) * (a + b)
+   (a0  (A (G) left right))
+   (addstage (ADDSTAGE (G (+ G 2)) a0.out))
+   (m0 (M ((+ G 1)) addstage.out addstage.out))
+   (multstage (MULTSTAGE ((+ G 3) (+ G 5)) m0.out)))
+  (connect (out multstage.out)))
