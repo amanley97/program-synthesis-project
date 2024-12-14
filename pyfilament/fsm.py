@@ -12,7 +12,7 @@ class Fsm:
         self.name = f"{self.trigger.event}_fsm"
 
     def __repr__(self):
-        return f"fsm {self.name}[{self.states}]({self.trigger.name})"
+        return f"fsm {self.name}[{self.states}]({self.trigger.name});"
 
     def port(self, state):
         """

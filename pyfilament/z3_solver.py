@@ -81,7 +81,7 @@ def solve_component_constraints(component: Component):
     # Solve constraints
     if solver.check() == sat:
         model = solver.model()
-        print(model)
+        # print(model)
         results = {
             "start_times": start_times,
             "states": {state: model[states[state]].as_long() for state in states},

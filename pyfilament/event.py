@@ -19,7 +19,7 @@ class Range:
 
     def __repr__(self):
         if self.hi is not None:
-            return f"{self.lo}, {self.hi}"
+            return f"{self.lo},{self.hi}"
         else:
             return f"{self.lo}"
 
